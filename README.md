@@ -73,6 +73,9 @@ supabase/
   functions/invite-owner/
 ```
 
+## Actualizaciones de base de datos
+Si ya tenías el proyecto andando, ejecutá en orden los archivos nuevos de `supabase/migrations/` (por ejemplo `002_nuevos_disenos.sql`).
+
 ## Agregar un diseño nuevo
 1. Sumalo en `THEMES` y `THEME_PRESETS` (`src/lib/designs.js`).
 2. Agregá su bloque `.t-nombre { ... }` en `src/styles/menu.css`.

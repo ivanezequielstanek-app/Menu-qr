@@ -1,0 +1,442 @@
+/* =====================================================================
+   MENÚ PÚBLICO · base común + 4 diseños
+   Cada diseño solo define variables y algunos detalles propios.
+   ===================================================================== */
+.mq{
+  --radius:14px; --display-w:700; --h1:44px; --h2:26px; --name-size:17px; --hero-align:left;
+  --field-r:max(calc(var(--radius) - 4px), 4px);
+  position:relative; background:var(--bg); color:var(--fg); font-family:var(--body);
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.mq *,.mq *::before,.mq *::after{box-sizing:border-box}
+:where(.mq) button{font:inherit;color:inherit;cursor:pointer}
+.mq :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mq:not(.mq-embedded){min-height:100vh}
+.mq-embedded{height:100%;overflow:hidden}
+.mq-scroll{position:relative;min-height:100%;display:flex;flex-direction:column}
+.mq-scroll>*{flex-shrink:0}
+.mq-embedded .mq-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.mq:not(.mq-embedded) .mq-scroll{min-height:100vh}
+
+/* ---------- Encabezado ---------- */
+.mq-hero{padding:56px 20px 30px;text-align:var(--hero-align);position:relative;overflow:hidden}
+.mq-hero-in{max-width:720px;margin:0 auto;position:relative;z-index:1}
+.mq-logo{width:76px;height:76px;border-radius:50%;object-fit:cover;display:block;margin:0 0 18px;background:var(--surface)}
+.mq-hero h1{overflow-wrap:anywhere;margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:var(--h1);line-height:1;text-wrap:balance}
+.mq-hero p{margin:12px 0 0;color:var(--muted);font-size:16px;text-wrap:balance}
+.mq-chip{display:inline-block;margin-top:16px;padding:5px 12px;border-radius:999px;background:var(--accent);color:var(--accent-fg);font-size:13px;font-weight:600}
+.hero-compact .mq-hero{padding-top:26px;padding-bottom:18px}
+.hero-compact .mq-hero-in{display:flex;align-items:center;gap:14px}
+.hero-compact .mq-hero h1{font-size:calc(var(--h1) * .58)}
+.hero-compact .mq-hero p{margin-top:4px;font-size:14px}
+.hero-compact .mq-logo{width:52px;height:52px;margin:0;flex:none}
+
+/* ---------- Pestañas de categorías ---------- */
+.mq-tabs{position:sticky;top:0;z-index:10;background:var(--tabs-bg,var(--bg));border-bottom:1px solid var(--line)}
+.mq-tabs-in{position:relative;max-width:720px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+.mq-tabs-in::-webkit-scrollbar{display:none}
+.mq-tab{flex:none;border:0;background:transparent;color:var(--muted);font-size:15px;font-weight:500;padding:8px 15px;border-radius:999px;transition:background .2s,color .2s}
+.mq-tab.is-active{background:var(--accent);color:var(--accent-fg)}
+
+/* ---------- Secciones y productos ---------- */
+.mq-main{flex:1;width:100%;max-width:720px;margin:0 auto;padding:4px 16px 28px}
+.mq-sec{padding-top:6px}
+.mq-sec-title{display:block;font-family:var(--display);font-weight:var(--display-w);font-size:var(--h2);line-height:1.1;margin:28px 0 6px}
+.mq-list{display:flex;flex-direction:column}
+.mq-item{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line)}
+.mq-item:last-child{border-bottom:0}
+.mq-photo{flex:none;position:relative;overflow:hidden;border-radius:var(--field-r);background:var(--surface)}
+.mq-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.mq-ph{display:grid;place-items:center;width:100%;height:100%;font-family:var(--display);font-size:34px;color:var(--accent);
+  background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 16%,var(--surface)))}
+.photos-sm .mq-photo{width:60px;height:60px}
+.photos-md .mq-photo{width:96px;height:96px}
+.layout-list.photos-lg .mq-item.has-photo{flex-wrap:wrap}
+.layout-list.photos-lg .mq-photo{width:100%;aspect-ratio:16/10}
+.mq-body{flex:1;min-width:0}
+.mq-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mq-name{margin:0;font-size:var(--name-size);font-weight:600;line-height:1.25}
+.mq-lead{display:none}
+.mq-price{flex:none;font-weight:600;color:var(--price,var(--fg));font-variant-numeric:tabular-nums}
+.mq-desc{margin:5px 0 0;color:var(--muted);font-size:14.5px;line-height:1.5}
+.mq-out{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.mq-item.is-out .mq-name,.mq-item.is-out .mq-price,.mq-item.is-out .mq-photo{opacity:.45}
+.mq-actions{flex:none;align-self:center}
+.layout-list.photos-lg .mq-item.has-photo .mq-actions{align-self:flex-end}
+.mq-add{width:38px;height:38px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;transition:transform .15s}
+.mq-add:active{transform:scale(.9)}
+.mq-step{display:flex;align-items:center;height:38px;border-radius:999px;background:var(--accent);color:var(--accent-fg)}
+.mq-step button{width:34px;height:38px;border:0;background:none;font-size:20px;line-height:1}
+.mq-step span{min-width:16px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Cuadrícula y deslizable comparten el formato de tarjeta */
+.layout-grid .mq-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-top:6px}
+@media (min-width:640px){.mq:not(.mq-embedded).layout-grid .mq-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.layout-carousel .mq-list{flex-direction:row;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:6px 16px 16px;scroll-padding:0 16px;scrollbar-width:none;overscroll-behavior-x:contain}
+.layout-carousel .mq-list::-webkit-scrollbar{display:none}
+.layout-carousel .mq-list>.mq-item{flex:0 0 76%;max-width:300px;scroll-snap-align:start}
+.layout-carousel.photos-none .mq-list>.mq-item,.layout-carousel.photos-sm .mq-list>.mq-item{flex-basis:64%}
+:is(.layout-grid,.layout-carousel) .mq-item,:is(.layout-grid,.layout-carousel) .mq-item:last-child{position:relative;flex-direction:column;gap:0;padding:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+:is(.layout-grid,.layout-carousel) .mq-photo{width:100%;height:auto;border-radius:0;aspect-ratio:4/3}
+:is(.layout-grid,.layout-carousel).photos-sm .mq-photo{aspect-ratio:16/9}
+.layout-grid.photos-lg .mq-photo{aspect-ratio:1/1}
+.layout-carousel.photos-lg .mq-photo{aspect-ratio:4/5}
+:is(.layout-grid,.layout-carousel) .mq-body{width:100%;padding:12px 12px 14px}
+:is(.layout-grid,.layout-carousel) .mq-item.can-order .mq-body{padding-bottom:58px}
+:is(.layout-grid,.layout-carousel) .mq-head{flex-direction:column;align-items:flex-start;gap:3px}
+.layout-grid .mq-name{font-size:calc(var(--name-size) - 1px)}
+:is(.layout-grid,.layout-carousel) .mq-desc{font-size:13.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+:is(.layout-grid,.layout-carousel) .mq-actions{position:absolute;right:10px;bottom:10px}
+
+/* Producto que se abre al tocar */
+.mq-tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mq-photo.mq-tap img{transition:transform .35s ease}
+@media (hover:hover){.mq-photo.mq-tap:hover img{transform:scale(1.04)}}
+
+/* Recomendados */
+.mq-feat{padding-top:20px}
+.mq-feat-title{font-family:var(--display);font-weight:var(--display-w);font-size:calc(var(--h2) * .82);line-height:1.1;margin:0 0 12px}
+.mq-feat-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 10px;scroll-padding:0 16px;scrollbar-width:none;overscroll-behavior-x:contain}
+.mq-feat-row::-webkit-scrollbar{display:none}
+.mq-feat-card{position:relative;flex:0 0 62%;max-width:250px;aspect-ratio:4/5;scroll-snap-align:start;border:0;padding:0;border-radius:var(--radius);overflow:hidden;background:var(--surface);text-align:left;color:#fff}
+.mq-feat-card img,.mq-feat-card .mq-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mq-feat-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.75))}
+.mq-feat-info{position:absolute;left:14px;right:14px;bottom:14px;z-index:1;display:flex;flex-direction:column;gap:3px}
+.mq-feat-info strong{font-family:var(--display);font-weight:var(--display-w);font-size:19px;line-height:1.15;text-wrap:balance}
+.mq-feat-info span{font-weight:600;font-size:14px;opacity:.92}
+
+/* Ficha ampliada del producto */
+.mq-detail{position:relative;width:100%;max-width:560px;max-height:94%;overflow-y:auto;overflow-x:hidden;background:var(--sheet,var(--bg));color:var(--fg);border-radius:22px 22px 0 0;animation:mqUp .3s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:700px){.mq:not(.mq-embedded) .mq-detail{border-radius:22px}}
+.mq-detail-slide.from-r{animation:mqFromR .28s cubic-bezier(.2,.8,.2,1)}
+.mq-detail-slide.from-l{animation:mqFromL .28s cubic-bezier(.2,.8,.2,1)}
+.mq-detail-img{position:relative;width:100%;aspect-ratio:1/1;max-height:min(58vh,520px);background:var(--surface);overflow:hidden}
+.mq-embedded .mq-detail-img{max-height:420px}
+.mq-detail-img.is-empty{aspect-ratio:16/9}
+.mq-detail-img img,.mq-detail-img .mq-ph{width:100%;height:100%;object-fit:cover;display:grid}
+.mq-detail-img .mq-ph{font-size:64px}
+.mq-detail-x{position:absolute;top:12px;right:12px;z-index:3;width:38px;height:38px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff!important;backdrop-filter:blur(6px)}
+.mq-detail-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:40px;height:40px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.9);color:#141414!important;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.mq-detail-nav:disabled{opacity:0;pointer-events:none}
+.mq-detail-nav.is-prev{left:12px}.mq-detail-nav.is-next{right:12px}
+.mq-detail-count{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:2;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;backdrop-filter:blur(6px)}
+.mq-detail-body{padding:20px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.mq-detail-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.mq-detail-head h2{margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:28px;line-height:1.1;text-wrap:balance}
+.mq-detail-price{flex:none;font-size:20px;font-weight:700;color:var(--price,var(--fg));font-variant-numeric:tabular-nums}
+.mq-detail-desc{margin:10px 0 0;color:var(--muted);font-size:15.5px;line-height:1.55}
+.mq-detail-incart{margin:12px 0 0;font-size:13px;font-weight:600;color:var(--accent)}
+.mq-detail-actions{display:flex;gap:10px;margin-top:20px}
+.mq-big-step{height:54px;flex:none}
+.mq-detail-add.mq-submit{margin-top:0}
+.mq-big-step button{width:44px;height:52px;font-size:22px}
+.mq-detail-add{flex:1;margin-top:0;min-height:54px}
+
+/* Desplegables */
+.mq-acc{border-bottom:1px solid var(--line)}
+.mq-acc-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:none;padding:20px 0;text-align:left}
+.mq-acc-head .mq-sec-title{margin:0}
+.mq-acc-meta{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.mq-acc-meta svg{transition:transform .25s}
+.mq-acc-head[aria-expanded="true"] .mq-acc-meta svg{transform:rotate(180deg)}
+.mq-acc-body{padding-bottom:14px;animation:mqFade .25s ease}
+.cats-none .mq-main{padding-top:12px}
+.mq-empty,.mq-muted{color:var(--muted);text-align:center;padding:48px 0}
+
+/* ---------- Barra del pedido ---------- */
+.mq-dock{position:sticky;bottom:0;z-index:20;display:flex;justify-content:center;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));pointer-events:none}
+.mq-cartbar{pointer-events:auto;width:100%;max-width:520px;display:flex;align-items:center;gap:12px;padding:14px 18px;border:0;
+  border-radius:calc(var(--radius) + 2px);background:var(--accent);color:var(--accent-fg);font-weight:600;font-size:15px;text-decoration:none;
+  box-shadow:0 14px 32px -12px rgba(0,0,0,.5);animation:mqUp .3s cubic-bezier(.2,.8,.2,1)}
+.mq-cartbar strong{margin-left:auto;font-variant-numeric:tabular-nums}
+.mq-count{min-width:26px;height:26px;padding:0 7px;border-radius:999px;display:grid;place-items:center;background:rgba(0,0,0,.2);font-size:13px}
+.mq-wa,.mq-wa:visited{background:#1fa855;color:#fff;justify-content:center}
+
+/* ---------- Hoja del pedido ---------- */
+.mq-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:rgba(8,8,12,.55);animation:mqFade .2s ease}
+.mq-embedded .mq-overlay{position:absolute}
+.mq-sheet{width:100%;max-width:560px;max-height:92%;overflow-y:auto;background:var(--sheet,var(--bg));color:var(--fg);
+  border-radius:22px 22px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom,0px));animation:mqUp .3s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:700px){
+  .mq:not(.mq-embedded) .mq-overlay{align-items:center}
+  .mq:not(.mq-embedded) .mq-sheet{border-radius:22px}
+}
+.mq-grip{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.mq-sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.mq-sheet h2{margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:26px;line-height:1.1}
+.mq-close{width:36px;height:36px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center}
+.mq-lines{list-style:none;margin:0;padding:0}
+.mq-line{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.mq-line-name{flex:1;min-width:0;font-weight:500}
+.mq-line-name small{display:block;color:var(--muted);font-weight:400;font-size:13px}
+.mq-mini-step{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px}
+.mq-mini-step button{width:32px;height:32px;border:0;background:none;font-size:18px}
+.mq-mini-step span{min-width:18px;text-align:center;font-weight:600}
+.mq-total{display:flex;justify-content:space-between;padding:16px 0 4px;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.mq-types{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;margin-top:14px}
+.mq-type{padding:11px 6px;border-radius:var(--field-r);border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:500}
+.mq-type[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.mq-label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:16px 0 6px}
+.mq-input{width:100%;padding:12px 14px;font:inherit;font-size:16px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:var(--field-r);outline:none;resize:vertical}
+.mq-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.mq-error{color:#e5484d;font-size:14px;margin:12px 0 0}
+.mq-submit{width:100%;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border:0;
+  border-radius:calc(var(--radius) + 2px);background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:16px;text-decoration:none}
+.mq-submit.is-wa{background:#1fa855;color:#fff}
+.mq-submit:disabled{opacity:.55;cursor:default}
+.mq-sent{text-align:center;padding:24px 4px 6px}
+.mq-sent p{color:var(--muted);margin:8px 0 0}
+.mq-sent-icon{width:64px;height:64px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;background:var(--accent);color:var(--accent-fg);animation:mqPop .4s cubic-bezier(.2,1.4,.4,1)}
+.mq-link{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);text-decoration:underline;font-size:14px}
+
+@keyframes mqUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes mqFade{from{opacity:0}}
+@keyframes mqPop{from{transform:scale(.4);opacity:0}}
+@keyframes mqFromR{from{transform:translateX(40px);opacity:0}}
+@keyframes mqFromL{from{transform:translateX(-40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.mq *{animation:none!important;transition:none!important}}
+
+/* =====================================================================
+   1 · ELEGANTE — carta de restaurante de autor
+   ===================================================================== */
+.t-elegante{
+  --bg:#111920; --surface:#18222b; --fg:#ece5d3; --muted:#a29d8e; --line:rgba(236,229,211,.12);
+  --accent:#c6a66b; --accent-fg:#111920; --price:#c6a66b;
+  --display:"Cormorant Garamond",Georgia,serif; --body:"Jost",system-ui,sans-serif;
+  --display-w:500; --h1:54px; --h2:32px; --name-size:21px; --radius:4px; --hero-align:center;
+}
+.t-elegante .mq-hero{padding:72px 24px 40px}
+.t-elegante .mq-hero h1{letter-spacing:.01em}
+.t-elegante .mq-hero p{font-family:var(--display);font-style:italic;font-size:20px}
+.t-elegante:not(.hero-compact) .mq-hero-in::after{content:"";display:block;width:56px;height:1px;background:var(--accent);margin:28px auto 0}
+.t-elegante:not(.hero-compact) .mq-logo{margin:0 auto 22px;box-shadow:0 0 0 1px var(--accent),0 0 0 5px var(--bg),0 0 0 6px rgba(198,166,107,.35)}
+.t-elegante.hero-compact{--hero-align:left}
+.t-elegante .mq-tabs{border-bottom-color:transparent}
+.t-elegante .mq-tabs-in>:first-child{margin-left:auto}
+.t-elegante .mq-tabs-in>:last-child{margin-right:auto}
+.t-elegante .mq-tab{font-family:var(--display);font-size:19px;font-style:italic;border-radius:0;padding:6px 10px}
+.t-elegante .mq-tab.is-active{background:none;color:var(--accent);box-shadow:inset 0 -1px 0 var(--accent)}
+.t-elegante .mq-sec-title{font-style:italic;color:var(--accent)}
+.t-elegante.cats-tabs .mq-sec-title{text-align:center;margin-top:40px;margin-bottom:12px}
+.t-elegante .mq-item{border-bottom:0;padding:13px 0}
+.t-elegante .mq-name{font-family:var(--display);font-weight:600;letter-spacing:.005em}
+.t-elegante .mq-desc{font-weight:300;font-size:15px}
+.t-elegante .mq-price{font-family:var(--display);font-size:21px;font-weight:500}
+.t-elegante.layout-list .mq-head{justify-content:flex-start}
+.t-elegante.layout-list .mq-lead{display:block;flex:1;min-width:18px;border-bottom:1px dotted rgba(236,229,211,.32);transform:translateY(-6px)}
+.t-elegante.layout-list.photos-sm .mq-photo,.t-elegante.layout-list.photos-md .mq-photo{border-radius:50%;box-shadow:0 0 0 1px rgba(198,166,107,.5)}
+.t-elegante .mq-add{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);width:34px;height:34px}
+.t-elegante .mq-step{height:34px}
+.t-elegante:is(.layout-grid,.layout-carousel) .mq-item{border-color:var(--line)}
+.t-elegante .mq-cartbar{border-radius:3px;letter-spacing:.02em}
+.t-elegante .mq-sheet,.t-elegante .mq-detail{border-top:1px solid var(--accent)}
+.t-elegante .mq-feat-title{text-align:center;font-style:italic;color:var(--accent)}
+.t-elegante .mq-detail-head h2{font-weight:600}
+
+/* =====================================================================
+   2 · URBANO — hamburgueserías y comida rápida
+   ===================================================================== */
+.t-burger{
+  --bg:#fff8e6; --surface:#ffffff; --fg:#1c1410; --muted:#6e5d4c; --line:#1c1410;
+  --accent:#e63b1f; --accent-fg:#ffffff; --price:#e63b1f;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"DM Sans",system-ui,sans-serif;
+  --display-w:800; --h1:58px; --h2:30px; --name-size:18px; --radius:18px; --sheet:#fffdf6;
+}
+.t-burger .mq-hero{background:#ffc629;padding:58px 20px 38px;border-bottom:2px solid var(--fg)}
+.t-burger:not(.hero-compact) .mq-hero::after{content:"";position:absolute;right:-56px;top:-56px;width:200px;height:200px;border-radius:50%;background:var(--accent)}
+.t-burger:not(.hero-compact) .mq-hero::before{content:"";position:absolute;right:-26px;bottom:-48px;width:96px;height:96px;border-radius:50%;border:2px solid var(--fg)}
+.t-burger .mq-hero h1{letter-spacing:-.04em;line-height:.9;max-width:11ch}
+.t-burger .mq-hero p{color:var(--fg);font-weight:500;opacity:.85}
+.t-burger .mq-logo{border:2px solid var(--fg)}
+.t-burger .mq-chip{background:var(--fg);color:#ffc629}
+.t-burger .mq-tabs{border-bottom:2px solid var(--fg)}
+.t-burger .mq-tab{border:2px solid var(--fg);color:var(--fg);font-weight:700;background:var(--surface)}
+.t-burger .mq-tab.is-active{background:var(--fg);color:#ffc629}
+.t-burger .mq-sec-title{letter-spacing:-.03em}
+.t-burger .mq-list{gap:14px;padding-top:8px}
+.t-burger.layout-carousel .mq-list{padding-bottom:20px}
+.t-burger .mq-feat-card{border:2px solid var(--fg);box-shadow:4px 4px 0 var(--fg)}
+.t-burger .mq-feat-row{padding-bottom:16px}
+.t-burger .mq-detail{border-top:2px solid var(--fg)}
+.t-burger .mq-list>.mq-item{background:var(--surface);border:2px solid var(--fg);border-radius:var(--radius);box-shadow:4px 4px 0 var(--fg)}
+.t-burger.layout-list .mq-list>.mq-item{padding:14px}
+.t-burger.layout-list .mq-photo{border:2px solid var(--fg)}
+.t-burger:is(.layout-grid,.layout-carousel) .mq-photo{border-bottom:2px solid var(--fg)}
+.t-burger .mq-name{font-family:var(--display);font-weight:800;letter-spacing:-.015em}
+.t-burger .mq-price{font-weight:700}
+.t-burger .mq-add{border:2px solid var(--fg)}
+.t-burger .mq-step{border:2px solid var(--fg)}
+.t-burger .mq-out{border-color:var(--fg)}
+.t-burger .mq-acc{border-bottom:2px solid var(--fg)}
+.t-burger .mq-cartbar{border:2px solid var(--fg);box-shadow:4px 4px 0 var(--fg)}
+.t-burger .mq-type,.t-burger .mq-input,.t-burger .mq-mini-step{border-width:2px}
+.t-burger .mq-line{border-bottom-color:rgba(28,20,16,.15)}
+
+/* =====================================================================
+   3 · NOCTURNO — bares y coctelerías
+   ===================================================================== */
+.t-bar{
+  --bg:#16121d; --surface:#211a2b; --fg:#f2edf7; --muted:#9c93ac; --line:rgba(242,237,247,.09);
+  --accent:#f0a646; --accent-fg:#16121d; --price:#f0a646;
+  --display:"Big Shoulders Display",Impact,sans-serif; --body:"Manrope",system-ui,sans-serif;
+  --display-w:800; --h1:80px; --h2:36px; --name-size:22px; --radius:14px;
+}
+.t-bar .mq-hero{padding:80px 22px 34px;
+  background:radial-gradient(90% 70% at 88% 0%,rgba(123,92,196,.55),transparent 70%),radial-gradient(60% 60% at 0% 110%,rgba(240,166,70,.2),transparent 70%)}
+.t-bar .mq-hero h1{text-transform:uppercase;line-height:.84;color:var(--accent);letter-spacing:.005em}
+.t-bar .mq-hero p{font-size:15px}
+.t-bar .mq-tab{font-family:var(--display);text-transform:uppercase;font-size:19px;font-weight:600;letter-spacing:.05em;border-radius:0;padding:6px 10px}
+.t-bar .mq-tab.is-active{background:transparent;color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.t-bar .mq-sec-title{text-transform:uppercase;letter-spacing:.03em;color:#bfa8ec}
+.t-bar .mq-name{font-family:var(--display);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
+.t-bar .mq-price{font-family:var(--display);font-size:23px;font-weight:800}
+.t-bar .mq-desc{font-size:14px}
+.t-bar .mq-photo{box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+.t-bar .mq-add{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.t-bar:is(.layout-grid,.layout-carousel) .mq-item{border-color:transparent}
+.t-bar .mq-acc-head .mq-sec-title{font-size:32px}
+.t-bar .mq-sheet,.t-bar .mq-detail{background:#1d1726}
+.t-bar .mq-feat-title,.t-bar .mq-detail-head h2{text-transform:uppercase;letter-spacing:.02em}
+.t-bar .mq-feat-info strong{text-transform:uppercase;font-size:22px;letter-spacing:.02em}
+
+/* =====================================================================
+   4 · BRASA — parrillas y bodegones
+   ===================================================================== */
+.t-parrilla{
+  --bg:#ffffff; --surface:#faf5f1; --fg:#231a15; --muted:#73665c; --line:#efe4db;
+  --accent:#c4261b; --accent-fg:#ffffff; --price:#c4261b;
+  --display:"Zilla Slab",Rockwell,serif; --body:"Work Sans",system-ui,sans-serif;
+  --display-w:700; --h1:52px; --h2:28px; --name-size:17px; --radius:12px;
+}
+.t-parrilla .mq-hero{color:#fff;padding:64px 22px 38px;
+  background:radial-gradient(120% 90% at 50% 125%,#f47a1f 0%,rgba(244,122,31,0) 58%),linear-gradient(180deg,#a51d16,#bf2419)}
+.t-parrilla .mq-hero p{color:rgba(255,255,255,.85)}
+.t-parrilla .mq-hero h1{letter-spacing:-.01em}
+.t-parrilla .mq-logo{border:3px solid #fff}
+.t-parrilla .mq-chip{background:#fff;color:var(--accent)}
+.t-parrilla .mq-tabs{box-shadow:0 8px 18px -16px rgba(35,26,21,.45)}
+.t-parrilla .mq-tab{font-weight:600;color:var(--fg)}
+.t-parrilla .mq-tab.is-active{color:var(--accent-fg)}
+.t-parrilla.cats-tabs .mq-sec-title,.t-parrilla.cats-none .mq-sec-title{display:flex;align-items:center;gap:14px;color:var(--accent)}
+.t-parrilla.cats-tabs .mq-sec-title::after{content:"";flex:1;height:2px;background:var(--line)}
+.t-parrilla .mq-name{font-weight:600}
+.t-parrilla .mq-price{font-family:var(--display);font-size:20px}
+.t-parrilla .mq-acc-head .mq-sec-title{color:var(--fg)}
+.t-parrilla:is(.layout-grid,.layout-carousel) .mq-item{background:#fff;box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(35,26,21,.35)}
+
+/* =====================================================================
+   5 · CAFÉ — cafeterías, brunch y pastelerías
+   ===================================================================== */
+.t-cafe{
+  --bg:#eef1ea; --surface:#ffffff; --fg:#1f2b24; --muted:#5d6a61; --line:#d9e0d5;
+  --accent:#2f6b4f; --accent-fg:#ffffff; --price:#2f6b4f; --sheet:#f7f8f4;
+  --display:"Fraunces",Georgia,serif; --body:"Nunito Sans",system-ui,sans-serif;
+  --display-w:600; --h1:52px; --h2:28px; --name-size:17px; --radius:22px;
+}
+.t-cafe .mq-hero{padding:64px 22px 36px}
+.t-cafe:not(.hero-compact) .mq-hero::before{content:"";position:absolute;width:250px;height:250px;right:-96px;top:-84px;border-radius:50%;background:#f3c6b6}
+.t-cafe:not(.hero-compact) .mq-hero::after{content:"";position:absolute;width:74px;height:74px;right:62px;top:118px;border-radius:50%;background:#c4d9bf}
+.t-cafe .mq-hero h1{letter-spacing:-.025em;max-width:12ch}
+.t-cafe .mq-hero p{font-size:17px}
+.t-cafe .mq-logo{box-shadow:0 0 0 4px #fff}
+.t-cafe .mq-tabs{border-bottom:0}
+.t-cafe .mq-tab{border:1.5px solid var(--line);background:var(--surface);color:var(--fg);font-weight:600}
+.t-cafe .mq-tab.is-active{border-color:var(--accent)}
+.t-cafe .mq-sec-title,.t-cafe .mq-feat-title{letter-spacing:-.02em}
+.t-cafe .mq-name{font-weight:700}
+.t-cafe .mq-price{font-weight:800}
+.t-cafe .mq-photo{border-radius:16px}
+.t-cafe.layout-list .mq-list{gap:10px;padding-top:4px}
+.t-cafe.layout-list .mq-list>.mq-item{background:var(--surface);border:0;border-radius:var(--radius);padding:10px 14px 10px 10px}
+.t-cafe:is(.layout-grid,.layout-carousel) .mq-list>.mq-item{border:0;padding:8px;box-shadow:0 14px 28px -22px rgba(31,43,36,.5)}
+.t-cafe:is(.layout-grid,.layout-carousel) .mq-photo{border-radius:16px}
+.t-cafe:is(.layout-grid,.layout-carousel) .mq-body{padding:10px 6px 8px}
+.t-cafe:is(.layout-grid,.layout-carousel) .mq-item.can-order .mq-body{padding-bottom:52px}
+.t-cafe .mq-acc{border-bottom-color:var(--line)}
+.t-cafe .mq-detail-img{border-radius:0 0 22px 22px}
+
+/* =====================================================================
+   6 · ZEN — sushi y cocina asiática
+   ===================================================================== */
+.t-zen{
+  --bg:#fbfaf6; --surface:#f2efe7; --fg:#171717; --muted:#6c685f; --line:#e4dfd3;
+  --accent:#c8321f; --accent-fg:#ffffff; --price:#171717;
+  --display:"Shippori Mincho",Georgia,serif; --body:"Zen Kaku Gothic New",system-ui,sans-serif;
+  --display-w:700; --h1:46px; --h2:23px; --name-size:18px; --radius:3px;
+}
+.t-zen .mq-hero{padding:64px 24px 34px}
+.t-zen:not(.hero-compact) .mq-hero h1::before{content:attr(data-initial);display:grid;place-items:center;width:46px;height:46px;margin-bottom:24px;background:var(--accent);color:var(--accent-fg);font-size:24px;border-radius:3px;line-height:1}
+.t-zen:not(.hero-compact) .mq-hero-in::after{content:"";display:block;height:1px;background:var(--fg);margin-top:32px}
+.t-zen .mq-hero p{letter-spacing:.05em;font-size:14px}
+.t-zen .mq-tab{border-radius:0;padding:8px 12px;letter-spacing:.04em}
+.t-zen .mq-tab.is-active{background:none;color:var(--fg);font-weight:700;box-shadow:inset 0 -2px 0 var(--accent)}
+.t-zen .mq-sec-title,.t-zen .mq-feat-title{display:flex;align-items:center;gap:12px;letter-spacing:.06em}
+.t-zen .mq-sec-title{margin-top:36px}
+.t-zen .mq-sec-title::before,.t-zen .mq-feat-title::before{content:"";width:9px;height:9px;background:var(--accent);flex:none}
+.t-zen .mq-name{font-family:var(--display);font-weight:700}
+.t-zen .mq-price{font-family:var(--display);font-weight:700;font-size:17px}
+.t-zen .mq-desc{letter-spacing:.01em}
+.t-zen .mq-photo{border-radius:2px}
+.t-zen .mq-add,.t-zen .mq-step{border-radius:2px;background:var(--fg);color:var(--bg)}
+.t-zen .mq-cartbar,.t-zen .mq-submit,.t-zen .mq-type,.t-zen .mq-input{border-radius:3px}
+.t-zen .mq-sheet,.t-zen .mq-detail{border-radius:6px 6px 0 0}
+.t-zen .mq-feat-card{border-radius:2px}
+.t-zen .mq-feat-info strong{font-size:20px}
+.t-zen .mq-acc-head .mq-sec-title{margin:0}
+
+/* =====================================================================
+   7 · FRESCO — saludable, bowls y jugos
+   ===================================================================== */
+.t-fresco{
+  --bg:#ffffff; --surface:#f2f7ee; --fg:#13301f; --muted:#587060; --line:#e1ebdb;
+  --accent:#2f9e57; --accent-fg:#ffffff; --price:#13301f;
+  --display:"Outfit",system-ui,sans-serif; --body:"Outfit",system-ui,sans-serif;
+  --display-w:700; --h1:52px; --h2:26px; --name-size:18px; --radius:24px;
+}
+.t-fresco .mq-hero{background:#1f7a45;color:#fff;border-radius:0 0 32px 32px;padding:60px 22px 42px}
+.t-fresco.hero-compact .mq-hero{border-radius:0 0 24px 24px}
+.t-fresco:not(.hero-compact) .mq-hero::after{content:"";position:absolute;right:-70px;bottom:-118px;width:200px;height:200px;border-radius:50%;background:#ffe17a}
+.t-fresco:not(.hero-compact) .mq-hero::before{content:"";position:absolute;right:96px;top:-40px;width:90px;height:90px;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
+.t-fresco .mq-hero h1{letter-spacing:-.035em}
+.t-fresco .mq-hero p{color:rgba(255,255,255,.85);font-size:17px}
+.t-fresco .mq-chip{background:#ffe17a;color:var(--fg)}
+.t-fresco .mq-tabs{border-bottom:0;margin-top:6px}
+.t-fresco .mq-tab{background:var(--surface);color:var(--fg);font-weight:600}
+.t-fresco .mq-tab.is-active{background:var(--fg);color:#fff}
+.t-fresco .mq-sec-title,.t-fresco .mq-feat-title{letter-spacing:-.025em}
+.t-fresco .mq-name{font-weight:600}
+.t-fresco .mq-price{display:inline-block;background:#ffe17a;padding:2px 10px;border-radius:999px;font-weight:700;font-size:15px}
+.t-fresco .mq-detail-price{background:#ffe17a;padding:3px 12px;border-radius:999px;font-size:18px}
+.t-fresco .mq-photo{border-radius:18px}
+.t-fresco:is(.layout-grid,.layout-carousel) .mq-list>.mq-item{border:0;background:var(--surface)}
+.t-fresco:is(.layout-grid,.layout-carousel) .mq-photo{border-radius:0}
+.t-fresco .mq-add{width:42px;height:42px}
+.t-fresco .mq-step{height:42px}
+.t-fresco .mq-acc{border-bottom-color:var(--line)}
+
+/* =====================================================================
+   8 · GALERÍA — la foto es protagonista
+   ===================================================================== */
+.t-galeria{
+  --bg:#ffffff; --surface:#f3f3f1; --fg:#0d0d0d; --muted:#6e6e6a; --line:#e7e7e3;
+  --accent:#0d0d0d; --accent-fg:#ffffff; --price:#0d0d0d;
+  --display:"Syne",system-ui,sans-serif; --body:"Manrope",system-ui,sans-serif;
+  --display-w:800; --h1:54px; --h2:32px; --name-size:19px; --radius:6px;
+}
+.t-galeria .mq-hero{padding:56px 20px 28px}
+.t-galeria .mq-hero h1{text-transform:uppercase;letter-spacing:-.02em;line-height:.92}
+.t-galeria .mq-hero p{font-size:15px;max-width:34ch}
+.t-galeria .mq-tabs{border-bottom:1px solid var(--fg)}
+.t-galeria .mq-tab{border-radius:0;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.07em}
+.t-galeria .mq-tab.is-active{background:none;color:var(--fg);box-shadow:inset 0 -3px 0 var(--fg)}
+.t-galeria .mq-sec-title,.t-galeria .mq-feat-title{text-transform:uppercase;letter-spacing:-.01em}
+.t-galeria .mq-sec-title{margin-top:40px;padding-bottom:10px;border-bottom:1px solid var(--fg)}
+.t-galeria .mq-name{font-family:var(--display);font-weight:700;letter-spacing:-.01em}
+.t-galeria .mq-price{font-weight:700}
+.t-galeria.layout-list .mq-item{padding:22px 0}
+.t-galeria.layout-list.photos-lg .mq-photo{aspect-ratio:4/3}
+.t-galeria .mq-add,.t-galeria .mq-step,.t-galeria .mq-cartbar,.t-galeria .mq-submit{border-radius:var(--radius)}
+.t-galeria .mq-feat-card{aspect-ratio:3/4}
+.t-galeria .mq-feat-info strong{text-transform:uppercase;font-size:18px;letter-spacing:-.01em}
+.t-galeria .mq-detail-head h2{text-transform:uppercase;letter-spacing:-.01em}
+.t-galeria .mq-acc-head .mq-sec-title{border:0;padding:0;margin:0}
