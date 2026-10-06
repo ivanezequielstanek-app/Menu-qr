@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { resolveOptions } from '../lib/designs'
 import { money, readableOn, waLink } from '../lib/format'
-import { Plus, Close, Chevron, Check, WhatsApp } from '../components/icons'
+import { Plus, Close, Chevron, Check, WhatsApp, Left, Right } from '../components/icons'
 
 const TYPES = [
   ['mesa', 'table', 'En la mesa'],
@@ -34,6 +34,9 @@ export default function MenuView({
   }, [categories, products])
 
   const byId = useMemo(() => Object.fromEntries(products.map((p) => [p.id, p])), [products])
+  const flat = useMemo(() => sections.flatMap((s) => s.items), [sections])
+  const featured = useMemo(() => (o.showFeatured ? flat.filter((p) => p.featured).slice(0, 12) : []), [flat, o.showFeatured])
+  const [detail, setDetail] = useState(null) // { list: 'all' | 'feat', i, dir }
   const [cart, setCart] = useState({})
   const [sheetOpen, setSheetOpen] = useState(false)
   const [active, setActive] = useState(null)
@@ -52,7 +55,16 @@ export default function MenuView({
   const enabledTypes = TYPES.filter(([, key]) => o.orderTypes[key]).map(([t]) => t)
   const canOrder = o.ordering && enabledTypes.length > 0
 
-  const add = (id) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }))
+  const add = (id, n = 1) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + n }))
+  const openDetail = (list, i) => setDetail({ list, i, dir: 0 })
+  const detailItems = detail?.list === 'feat' ? featured : flat
+  function navDetail(step) {
+    setDetail((d) => {
+      const len = (d.list === 'feat' ? featured : flat).length
+      const i = d.i + step
+      return i < 0 || i >= len ? d : { ...d, i, dir: step }
+    })
+  }
   const sub = (id) => setCart((c) => {
     const n = { ...c }; n[id] = (n[id] || 0) - 1
     if (n[id] <= 0) delete n[id]
@@ -76,11 +88,11 @@ export default function MenuView({
   }, [active])
 
   useEffect(() => {
-    if (embedded || !sheetOpen) return
+    if (embedded || (!sheetOpen && !detail)) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
-  }, [sheetOpen, embedded])
+  }, [sheetOpen, detail, embedded])
 
   function goTo(id) {
     const el = secRefs.current[id]
@@ -101,15 +113,21 @@ export default function MenuView({
     const img = p.image_url
     const showPhoto = o.photoSize !== 'none' && (img || o.layout === 'grid')
     const cls = ['mq-item', out && 'is-out', showPhoto && 'has-photo', canOrder && !out && 'can-order'].filter(Boolean).join(' ')
+    const open = o.lightbox ? () => openDetail('all', flat.indexOf(p)) : null
+    const tap = open ? {
+      role: 'button', tabIndex: 0, onClick: open, 'aria-label': `Ver ${p.name}`,
+      onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() } },
+    } : {}
+    const tapCls = open ? ' mq-tap' : ''
     return (
       <article key={p.id} className={cls}>
         {showPhoto && (
-          <div className="mq-photo">
+          <div className={'mq-photo' + tapCls} {...tap}>
             {img ? <img src={img} alt="" loading="lazy" decoding="async" />
               : <span className="mq-ph" aria-hidden="true">{p.name?.[0]}</span>}
           </div>
         )}
-        <div className="mq-body">
+        <div className={'mq-body' + tapCls} {...tap} aria-label={undefined}>
           <div className="mq-head">
             <h3 className="mq-name">{p.name}</h3>
             <span className="mq-lead" aria-hidden="true" />
@@ -173,7 +191,7 @@ export default function MenuView({
           <div className="mq-hero-in">
             {o.showLogo && restaurant?.logo_url && <img className="mq-logo" src={restaurant.logo_url} alt="" />}
             <div>
-              <h1>{restaurant?.name}</h1>
+              <h1 data-initial={restaurant?.name?.trim()?.[0] || ''}>{restaurant?.name}</h1>
               {restaurant?.tagline && <p>{restaurant.tagline}</p>}
               {initialTable && canOrder && <span className="mq-chip">Mesa {initialTable}</span>}
             </div>
@@ -191,7 +209,22 @@ export default function MenuView({
           </nav>
         )}
 
-        <main className="mq-main">{content}</main>
+        <main className="mq-main">
+          {featured.length > 0 && (
+            <section className="mq-feat" aria-label="Recomendados">
+              <h2 className="mq-feat-title">Recomendados</h2>
+              <div className="mq-feat-row">
+                {featured.map((p, i) => (
+                  <button key={p.id} type="button" className="mq-feat-card" onClick={() => openDetail('feat', i)}>
+                    {p.image_url ? <img src={p.image_url} alt="" loading="lazy" /> : <span className="mq-ph" aria-hidden="true">{p.name?.[0]}</span>}
+                    <span className="mq-feat-info"><strong>{p.name}</strong><span>{money(p.price)}</span></span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+          {content}
+        </main>
 
         {canOrder && count > 0 && (
           <div className="mq-dock">
@@ -212,6 +245,13 @@ export default function MenuView({
         )}
       </div>
 
+      {detail && detailItems[detail.i] && (
+        <Detail
+          items={detailItems} index={detail.i} dir={detail.dir} canOrder={canOrder}
+          inCart={cart[detailItems[detail.i].id] || 0}
+          onAdd={add} onNav={navDetail} onClose={() => setDetail(null)}
+        />
+      )}
       {sheetOpen && (
         <Checkout
           restaurant={restaurant} lines={lines} total={total} types={enabledTypes} hasWa={hasWa}
@@ -220,6 +260,71 @@ export default function MenuView({
           onSubmitOrder={onSubmitOrder} onOpenWhatsApp={onOpenWhatsApp}
         />
       )}
+    </div>
+  )
+}
+
+function Detail({ items, index, dir, canOrder, inCart, onAdd, onNav, onClose }) {
+  const p = items[index]
+  const out = p.available === false
+  const [qty, setQty] = useState(1)
+  const touch = useRef(null)
+  useEffect(() => { setQty(1) }, [p.id])
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') onNav(-1)
+      if (e.key === 'ArrowRight') onNav(1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose, onNav])
+
+  const onTouchStart = (e) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY } }
+  const onTouchEnd = (e) => {
+    if (!touch.current) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - touch.current.x, dy = t.clientY - touch.current.y
+    touch.current = null
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) onNav(dx < 0 ? 1 : -1)
+  }
+
+  return (
+    <div className="mq-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="mq-detail" role="dialog" aria-modal="true" aria-label={p.name} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div key={p.id} className={`mq-detail-slide ${dir > 0 ? 'from-r' : dir < 0 ? 'from-l' : ''}`}>
+          <div className={`mq-detail-img ${p.image_url ? '' : 'is-empty'}`}>
+            {p.image_url ? <img src={p.image_url} alt={p.name} /> : <span className="mq-ph" aria-hidden="true">{p.name?.[0]}</span>}
+            {items.length > 1 && <>
+              <button type="button" className="mq-detail-nav is-prev" onClick={() => onNav(-1)} disabled={index === 0} aria-label="Producto anterior"><Left /></button>
+              <button type="button" className="mq-detail-nav is-next" onClick={() => onNav(1)} disabled={index === items.length - 1} aria-label="Producto siguiente"><Right /></button>
+              <span className="mq-detail-count">{index + 1} / {items.length}</span>
+            </>}
+          </div>
+          <div className="mq-detail-body">
+            <div className="mq-detail-head">
+              <h2>{p.name}</h2>
+              <span className="mq-detail-price">{money(p.price)}</span>
+            </div>
+            {p.description && <p className="mq-detail-desc">{p.description}</p>}
+            {out && <span className="mq-out">Agotado</span>}
+            {inCart > 0 && <p className="mq-detail-incart">Ya tenés {inCart} en tu pedido</p>}
+            {canOrder && !out && (
+              <div className="mq-detail-actions">
+                <div className="mq-mini-step mq-big-step">
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Menos">−</button>
+                  <span>{qty}</span>
+                  <button type="button" onClick={() => setQty((q) => q + 1)} aria-label="Más">+</button>
+                </div>
+                <button type="button" className="mq-submit mq-detail-add" onClick={() => { onAdd(p.id, qty); onClose() }}>
+                  Agregar · {money(Number(p.price) * qty)}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <button type="button" className="mq-detail-x" onClick={onClose} aria-label="Cerrar"><Close /></button>
+      </div>
     </div>
   )
 }
