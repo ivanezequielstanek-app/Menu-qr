@@ -44,11 +44,12 @@ $$;
 
 -- ---------- 3. DISEÑO (solo lo edita el administrador) ----------
 -- options guarda: heroStyle, showLogo, categoryMode, layout, photoSize,
--- showDescriptions, accent, ordering, whatsapp, orderTypes{table,pickup,delivery}
+-- showDescriptions, lightbox, showFeatured, accent, ordering, whatsapp,
+-- orderTypes{table,pickup,delivery}
 create table restaurant_design (
   restaurant_id uuid primary key references restaurants(id) on delete cascade,
   theme         text not null default 'elegante'
-                check (theme in ('elegante','burger','bar','parrilla')),
+                check (theme in ('elegante','burger','bar','parrilla','cafe','zen','fresco','galeria')),
   options       jsonb not null default '{}'::jsonb,
   updated_at    timestamptz not null default now()
 );
@@ -72,6 +73,7 @@ create table products (
   price         numeric(12,2) not null check (price >= 0),
   image_path    text,
   available     boolean not null default true,
+  featured      boolean not null default false,
   position      int not null default 0,
   updated_at    timestamptz not null default now()
 );
