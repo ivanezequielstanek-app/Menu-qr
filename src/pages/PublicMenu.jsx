@@ -19,7 +19,7 @@ export default function PublicMenu() {
       const [d, c, p] = await Promise.all([
         supabase.from('restaurant_design').select('theme, options').eq('restaurant_id', r.id).maybeSingle(),
         supabase.from('categories').select('id, name, position, visible').eq('restaurant_id', r.id).order('position'),
-        supabase.from('products').select('id, category_id, name, description, price, image_path, available, position')
+        supabase.from('products').select('id, category_id, name, description, price, image_path, available, featured, position')
           .eq('restaurant_id', r.id).order('position'),
       ])
       if (!alive) return
