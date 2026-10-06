@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase, imageUrl, friendlyError, BUCKET } from '../../lib/supabase'
 import { money } from '../../lib/format'
 import { Empty, Modal, Spinner, Switch, useToast } from '../../components/ui'
-import { Plus, Edit, Trash, Up, Down, Eye, EyeOff, ImageIcon, Search } from '../../components/icons'
+import { Plus, Edit, Trash, Up, Down, Eye, EyeOff, ImageIcon, Search, Star } from '../../components/icons'
 import ProductForm from './ProductForm'
 
 export default function MenuEditor({ restaurant }) {
@@ -133,6 +133,9 @@ export default function MenuEditor({ restaurant }) {
                   <div className="prod-tools">
                     <Switch checked={p.available} onChange={(v) => patchProduct(p, { available: v })} label={p.available ? 'Disponible' : 'Agotado'} />
                     <div className="row-actions">
+                      <button className={`icon-btn star-btn ${p.featured ? 'is-on' : ''}`} onClick={() => patchProduct(p, { featured: !p.featured })}
+                        aria-pressed={!!p.featured} aria-label={p.featured ? 'Quitar de recomendados' : 'Marcar como recomendado'}
+                        title={p.featured ? 'Recomendado' : 'Marcar como recomendado'}><Star filled={p.featured} /></button>
                       {!q && <>
                         <button className="icon-btn" onClick={() => reorder('products', all, pi, -1)} disabled={pi === 0} aria-label="Subir"><Up /></button>
                         <button className="icon-btn" onClick={() => reorder('products', all, pi, 1)} disabled={pi === all.length - 1} aria-label="Bajar"><Down /></button>

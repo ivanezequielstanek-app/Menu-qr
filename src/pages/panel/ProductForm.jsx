@@ -11,6 +11,7 @@ export default function ProductForm({ restaurantId, categories, product, default
     price: product ? String(product.price).replace('.', ',') : '',
     category_id: product?.category_id || defaultCategory || categories[0]?.id || '',
     available: product?.available ?? true,
+    featured: product?.featured ?? false,
   })
   const [photo, setPhoto] = useState({ url: imageUrl(product?.image_path) })
   const [saving, setSaving] = useState(false)
@@ -27,7 +28,7 @@ export default function ProductForm({ restaurantId, categories, product, default
     try {
       const payload = {
         name: f.name.trim(), description: f.description.trim() || null, price,
-        category_id: f.category_id, available: f.available, updated_at: new Date().toISOString(),
+        category_id: f.category_id, available: f.available, featured: f.featured, updated_at: new Date().toISOString(),
       }
       let id = product?.id
       if (!id) {
@@ -85,7 +86,10 @@ export default function ProductForm({ restaurantId, categories, product, default
               </select>
             </label>
           </div>
-          <Switch checked={f.available} onChange={set('available')} label={f.available ? 'Disponible' : 'Agotado (se muestra pero no se puede pedir)'} />
+          <div className="switch-stack">
+            <Switch checked={f.available} onChange={set('available')} label={f.available ? 'Disponible' : 'Agotado (se muestra pero no se puede pedir)'} />
+            <Switch checked={f.featured} onChange={set('featured')} label="Recomendado (aparece destacado arriba del menú)" />
+          </div>
         </div>
         <div className="form-col">
           <span className="field-label">Foto</span>
