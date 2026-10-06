@@ -177,6 +177,8 @@ textarea.input{resize:vertical}
 .prod-price{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .prod-tools{display:flex;align-items:center;gap:10px}
 .prod-tools .switch-label{font-size:13px;color:var(--muted);min-width:68px}
+.star-btn.is-on{color:#d99a0b}
+.switch-stack{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .add-row{display:flex;align-items:center;gap:8px;width:100%;padding:13px 18px;border:0;background:none;color:var(--brand);font-weight:650;cursor:pointer;text-align:left}
 .add-row:hover{background:var(--brand-soft)}
 
@@ -269,6 +271,7 @@ textarea.input{resize:vertical}
 .theme-card strong{font-size:14.5px}
 .theme-card small{color:var(--muted);font-size:12px;line-height:1.35}
 .theme-cards-compact{grid-template-columns:repeat(4,1fr)}
+.theme-cards-compact .theme-card small{display:none}
 .theme-cards-compact .theme-card{align-items:center;padding:10px 6px}
 .preview{display:flex;flex-direction:column;align-items:center;gap:14px}
 .device{position:relative;width:390px;max-width:100%;height:min(780px,calc(100vh - 190px));min-height:520px;border-radius:34px;overflow:hidden;
