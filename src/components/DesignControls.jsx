@@ -61,11 +61,15 @@ export default function DesignControls({ theme, options: o, onChange }) {
         <h3>Productos</h3>
         <label className="dc-label">Distribución</label>
         <Segmented ariaLabel="Distribución" value={o.layout} onChange={(v) => set({ layout: v })}
-          options={[['list', 'Lista'], ['grid', 'Cuadrícula']]} />
+          options={[['list', 'Lista'], ['grid', 'Cuadrícula'], ['carousel', 'Deslizable']]} />
         <label className="dc-label">Tamaño de fotos</label>
         <Segmented ariaLabel="Tamaño de fotos" value={o.photoSize} onChange={(v) => set({ photoSize: v })}
           options={[['none', 'Sin fotos'], ['sm', 'Chicas'], ['md', 'Medianas'], ['lg', 'Grandes']]} />
         <Switch checked={o.showDescriptions} onChange={(v) => set({ showDescriptions: v })} label="Mostrar descripciones" />
+        <Switch checked={o.lightbox} onChange={(v) => set({ lightbox: v })} label="Ampliar al tocar un producto" />
+        <p className="hint">Abre la ficha con la foto grande; se puede deslizar entre productos.</p>
+        <Switch checked={o.showFeatured} onChange={(v) => set({ showFeatured: v })} label="Mostrar recomendados arriba" />
+        <p className="hint">El dueño los marca con la estrella en su panel.</p>
       </section>
 
       <section className="dc-group">
