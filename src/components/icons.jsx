@@ -36,3 +36,4 @@ export const Star = ({ filled, ...p }) => (
   <I {...p} fill={filled ? 'currentColor' : 'none'}
     d={<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z" />} />
 )
+export const Tag = (p) => <I {...p} d={<><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="8.5" r="1.5" /></>} />

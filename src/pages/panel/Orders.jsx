@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase, friendlyError } from '../../lib/supabase'
 import { money, timeAgo } from '../../lib/format'
-import { Empty, Segmented, Spinner, useToast } from '../../components/ui'
+import { ConfirmModal, Empty, Segmented, Spinner, useToast } from '../../components/ui'
 import { Bell } from '../../components/icons'
 
 const STATUS = {
@@ -33,6 +33,7 @@ export default function Orders({ restaurant }) {
   const [orders, setOrders] = useState(null)
   const [filter, setFilter] = useState('active')
   const [sound, setSound] = useState(false)
+  const [ask, setAsk] = useState(null)
   const soundRef = useRef(sound)
   soundRef.current = sound
   const [, tick] = useState(0)
@@ -120,7 +121,7 @@ export default function Orders({ restaurant }) {
                   <strong>{money(o.total)}</strong>
                   <div className="order-btns">
                     {['nuevo', 'preparando'].includes(o.status) && (
-                      <button className="btn btn-ghost btn-sm btn-danger-text" onClick={() => confirm('¿Cancelar este pedido?') && setStatus(o, 'cancelado')}>Cancelar</button>
+                      <button className="btn btn-ghost btn-sm btn-danger-text" onClick={() => setAsk(o)}>Cancelar</button>
                     )}
                     {st.next && <button className="btn btn-primary btn-sm" onClick={() => setStatus(o, st.next)}>{st.action}</button>}
                   </div>
@@ -130,6 +131,8 @@ export default function Orders({ restaurant }) {
           })}
         </div>
       )}
+      {ask && <ConfirmModal title="Cancelar pedido" text="¿Cancelar este pedido?" yes="Cancelar pedido"
+        onYes={() => setStatus(ask, 'cancelado')} onClose={() => setAsk(null)} />}
     </div>
   )
 }

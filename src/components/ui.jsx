@@ -25,6 +25,18 @@ export function Modal({ title, onClose, children, footer, size = 'md' }) {
   )
 }
 
+export function ConfirmModal({ title = 'Confirmar', text, yes = 'Eliminar', onYes, onClose }) {
+  return (
+    <Modal title={title} onClose={onClose} size="sm"
+      footer={<>
+        <button type="button" className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+        <button type="button" className="btn btn-danger-fill btn-grow" onClick={() => { onYes(); onClose() }}>{yes}</button>
+      </>}>
+      <p className="confirm-text">{text}</p>
+    </Modal>
+  )
+}
+
 export function Switch({ checked, onChange, label, disabled }) {
   return (
     <label className={`switch ${disabled ? 'is-disabled' : ''}`}>

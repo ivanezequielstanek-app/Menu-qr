@@ -80,12 +80,12 @@ function Demo() {
   useEffect(() => { if (wide && tab === 'preview') setTab('menu') }, [wide, tab])
 
   const tabs = [
-    ...(wide ? [] : [['preview', 'Vista previa', Eye]]),
-    ['menu', 'Menú', Edit],
-    ['design', 'Diseño', Palette],
-    ['local', 'Mi local', Store],
-    ['qr', 'Códigos QR', QrIcon],
-    ['orders', 'Pedidos', Bell],
+    ...(wide ? [] : [['preview', 'Vista previa', Eye, 'Ver']]),
+    ['menu', 'Menú', Edit, 'Menú'],
+    ['design', 'Diseño', Palette, 'Diseño'],
+    ['local', 'Mi local', Store, 'Local'],
+    ['qr', 'Códigos QR', QrIcon, 'QR'],
+    ['orders', 'Pedidos', Bell, 'Pedidos'],
   ]
   const goPreview = wide ? null : () => { setTab('preview'); window.scrollTo({ top: 0 }) }
   const tryTable = (n) => { update('table', n); if (!wide) goPreview() }
@@ -115,10 +115,10 @@ function Demo() {
 
         <div className={`demo-layout ${wide ? 'is-wide' : ''}`}>
           <div className="demo-work">
-            <nav className="tabs" aria-label="Secciones">
-              {tabs.map(([id, label, Icon]) => (
-                <button key={id} className={tab === id ? 'is-on' : ''} onClick={() => setTab(id)} aria-current={tab === id ? 'page' : undefined}>
-                  <Icon /> {label}
+            <nav className="tabs app-tabs" aria-label="Secciones">
+              {tabs.map(([id, label, Icon, short]) => (
+                <button key={id} className={tab === id ? 'is-on' : ''} onClick={() => { setTab(id); window.scrollTo({ top: 0 }) }} aria-current={tab === id ? 'page' : undefined}>
+                  <Icon /> <span className="tab-long">{label}</span><span className="tab-short">{short}</span>
                   {id === 'orders' && unseen > 0 && <span className="tab-count">{unseen}</span>}
                 </button>
               ))}
@@ -142,9 +142,6 @@ function Demo() {
         </div>
       </main>
 
-      {!wide && tab !== 'preview' && (
-        <button type="button" className="demo-fab" onClick={goPreview}><Eye /> Ver cómo queda</button>
-      )}
     </div>
   )
 }

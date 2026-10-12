@@ -11,10 +11,10 @@ import Settings from './panel/Settings'
 import QrCodes from './panel/QrCodes'
 
 const TABS = [
-  ['menu', 'Menú', Edit],
-  ['pedidos', 'Pedidos', Bell],
-  ['local', 'Mi local', Store],
-  ['qr', 'Códigos QR', QrIcon],
+  ['menu', 'Menú', Edit, 'Menú'],
+  ['pedidos', 'Pedidos', Bell, 'Pedidos'],
+  ['local', 'Mi local', Store, 'Local'],
+  ['qr', 'Códigos QR', QrIcon, 'QR'],
 ]
 
 export default function OwnerPanel() {
@@ -68,10 +68,10 @@ export default function OwnerPanel() {
         {forced && <span className="badge badge-info">Modo administrador</span>}
         {!restaurant.active && <span className="badge badge-warn">Menú pausado</span>}
       </div>
-      <nav className="tabs no-print" aria-label="Secciones">
-        {TABS.map(([id, label, Icon]) => (
+      <nav className="tabs app-tabs no-print" aria-label="Secciones">
+        {TABS.map(([id, label, Icon, short]) => (
           <button key={id} className={tab === id ? 'is-on' : ''} onClick={() => goTab(id)} aria-current={tab === id ? 'page' : undefined}>
-            <Icon /> {label}
+            <Icon /> <span className="tab-long">{label}</span><span className="tab-short">{short}</span>
           </button>
         ))}
       </nav>

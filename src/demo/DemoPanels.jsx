@@ -4,10 +4,9 @@ import QRCode from 'qrcode'
 import { money, onlyDigits, readableOn, slugify, timeAgo } from '../lib/format'
 import { themeById } from '../lib/designs'
 import { MENU_BASE_URL } from '../lib/brand'
-import { Empty, Segmented, useToast } from '../components/ui'
+import { ConfirmModal, Empty, Segmented, useToast } from '../components/ui'
 import PhotoPicker from '../components/PhotoPicker'
 import { useDemo } from './store'
-import { ConfirmModal } from './DemoMenuEditor'
 
 /* ---------------- Mi local ---------------- */
 export function DemoSettings() {
