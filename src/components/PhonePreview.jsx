@@ -4,7 +4,7 @@ import { Segmented } from './ui'
 
 // Vista previa del menú dentro de un marco de teléfono o tablet
 export default function PhonePreview(props) {
-  const [device, setDevice] = useState('phone')
+  const [device, setDevice] = useState(props.initialDevice || 'phone')
   const [toast, setToast] = useState('')
   const fakeSubmit = () => new Promise((r) => setTimeout(r, 500))
   const fakeWa = (url) => {

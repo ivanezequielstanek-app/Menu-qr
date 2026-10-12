@@ -11,7 +11,7 @@ import { waLink } from './lib/format'
 import DesignControls from './components/DesignControls'
 import PhonePreview from './components/PhonePreview'
 import { ToastProvider, useToast } from './components/ui'
-import { Edit, Bell, Store, QrIcon, Palette, Eye } from './components/icons'
+import { Edit, Bell, Store, QrIcon, Palette, Eye, External, Close } from './components/icons'
 import { DemoProvider, SAMPLE_LIST, useDemo } from './demo/store'
 import DemoMenuEditor from './demo/DemoMenuEditor'
 import { DemoSettings, DemoQr, DemoOrders } from './demo/DemoPanels'
@@ -28,7 +28,7 @@ function useWide(query = '(min-width: 1100px)') {
   return wide
 }
 
-function LivePreview() {
+function LivePreview({ onExpand, initialDevice }) {
   const { state, update, addOrder } = useDemo()
   const toast = useToast()
   const { restaurant, design, categories, products, table } = state
@@ -44,8 +44,29 @@ function LivePreview() {
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => update('table', '')}>Quitar</button>
         </div>
       )}
-      <PhonePreview restaurant={restaurant} theme={design.theme} options={design.options}
+      <PhonePreview restaurant={restaurant} theme={design.theme} options={design.options} initialDevice={initialDevice}
         categories={categories} products={products} initialTable={table} onSubmitOrder={submit} />
+      {onExpand && (
+        <button type="button" className="btn btn-secondary btn-sm demo-expand" onClick={onExpand}><External /> Ver en pantalla completa</button>
+      )}
+    </div>
+  )
+}
+
+// Vista previa grande: muestra el menú en tamaño real de celular o tablet
+function FullPreview({ onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [onClose])
+  const big = window.innerWidth >= 900
+  return (
+    <div className="demo-full" role="dialog" aria-modal="true" aria-label="Vista previa en pantalla completa">
+      <button type="button" className="btn btn-secondary demo-full-close" onClick={onClose}><Close /> Cerrar</button>
+      <LivePreview initialDevice={big ? 'tablet' : 'phone'} />
     </div>
   )
 }
@@ -74,6 +95,8 @@ function SamplePicker() {
 function Demo() {
   const { state, update, loadSample } = useDemo()
   const wide = useWide()
+  const phone = useWide('(max-width: 720px)')
+  const [full, setFull] = useState(false)
   const [tab, setTab] = useState(() => (window.matchMedia?.('(min-width: 1100px)').matches ? 'menu' : 'preview'))
   const unseen = state.orders.filter((o) => o.fresh).length
 
@@ -105,10 +128,11 @@ function Demo() {
       </div></header>
 
       <main className="container demo-container">
-        <section className="demo-intro">
+        <section className={`demo-intro ${phone && tab === 'preview' ? 'is-compact' : ''}`}>
           <div className="demo-intro-text">
             <h1>Probá tu menú digital</h1>
-            <p className="muted">Este es el panel que usa el dueño del local. Cambiá precios, fotos y productos, probá los diseños y armá un pedido como si fueras un cliente. <b>Nada de lo que hagas se guarda:</b> al recargar vuelve al ejemplo.</p>
+            <p className="demo-mini">Tocá todo lo que quieras: nada de lo que hagas se guarda.</p>
+            <p className="muted demo-long">Este es el panel que usa el dueño del local. Cambiá precios, fotos y productos, probá los diseños y armá un pedido como si fueras un cliente. <b>Nada de lo que hagas se guarda:</b> al recargar vuelve al ejemplo.</p>
           </div>
           <SamplePicker />
         </section>
@@ -123,7 +147,7 @@ function Demo() {
                 </button>
               ))}
             </nav>
-            {tab === 'preview' && <LivePreview />}
+            {tab === 'preview' && <LivePreview onExpand={phone ? null : () => setFull(true)} />}
             {tab === 'menu' && <DemoMenuEditor />}
             {tab === 'design' && (
               <div>
@@ -138,10 +162,10 @@ function Demo() {
             {tab === 'qr' && <DemoQr onTryTable={tryTable} />}
             {tab === 'orders' && <DemoOrders onGoPreview={goPreview} />}
           </div>
-          {wide && <aside className="demo-side"><LivePreview /></aside>}
+          {wide && <aside className="demo-side"><LivePreview onExpand={() => setFull(true)} /></aside>}
         </div>
       </main>
-
+      {full && <FullPreview onClose={() => setFull(false)} />}
     </div>
   )
 }
