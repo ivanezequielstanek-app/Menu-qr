@@ -16,7 +16,7 @@ export default function PhonePreview(props) {
     <div className="preview">
       <Segmented ariaLabel="Dispositivo" value={device} onChange={setDevice} options={[['phone', 'Celular'], ['tablet', 'Tablet']]} />
       <div className={`device device-${device}`}>
-        <MenuView key={props.theme} {...props} embedded onSubmitOrder={fakeSubmit} onOpenWhatsApp={fakeWa} />
+        <MenuView key={`${props.theme}-${props.initialTable || ''}`} {...props} embedded onSubmitOrder={props.onSubmitOrder || fakeSubmit} onOpenWhatsApp={fakeWa} />
         {toast && <div className="device-toast">{toast}</div>}
       </div>
     </div>

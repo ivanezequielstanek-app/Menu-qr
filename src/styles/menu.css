@@ -5,7 +5,7 @@
 .mq{
   --radius:14px; --display-w:700; --h1:44px; --h2:26px; --name-size:17px; --hero-align:left;
   --field-r:max(calc(var(--radius) - 4px), 4px);
-  position:relative; background:var(--bg); color:var(--fg); font-family:var(--body);
+  position:relative; container-type:inline-size; background:var(--bg); color:var(--fg); font-family:var(--body);
   font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
 .mq *,.mq *::before,.mq *::after{box-sizing:border-box}
@@ -22,7 +22,7 @@
 .mq-hero{padding:56px 20px 30px;text-align:var(--hero-align);position:relative;overflow:hidden}
 .mq-hero-in{max-width:720px;margin:0 auto;position:relative;z-index:1}
 .mq-logo{width:76px;height:76px;border-radius:50%;object-fit:cover;display:block;margin:0 0 18px;background:var(--surface)}
-.mq-hero h1{overflow-wrap:anywhere;margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:var(--h1);line-height:1;text-wrap:balance}
+.mq-hero h1{overflow-wrap:break-word;hyphens:manual;margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:min(var(--h1),var(--h1-fit,15cqi));line-height:1;text-wrap:balance}
 .mq-hero p{margin:12px 0 0;color:var(--muted);font-size:16px;text-wrap:balance}
 .mq-chip{display:inline-block;margin-top:16px;padding:5px 12px;border-radius:999px;background:var(--accent);color:var(--accent-fg);font-size:13px;font-weight:600}
 .hero-compact .mq-hero{padding-top:26px;padding-bottom:18px}
@@ -335,7 +335,7 @@
 }
 .t-cafe .mq-hero{padding:64px 22px 36px}
 .t-cafe:not(.hero-compact) .mq-hero::before{content:"";position:absolute;width:250px;height:250px;right:-96px;top:-84px;border-radius:50%;background:#f3c6b6}
-.t-cafe:not(.hero-compact) .mq-hero::after{content:"";position:absolute;width:74px;height:74px;right:62px;top:118px;border-radius:50%;background:#c4d9bf}
+.t-cafe:not(.hero-compact) .mq-hero::after{content:"";position:absolute;width:74px;height:74px;right:-22px;top:150px;border-radius:50%;background:#c4d9bf}
 .t-cafe .mq-hero h1{letter-spacing:-.025em;max-width:12ch}
 .t-cafe .mq-hero p{font-size:17px}
 .t-cafe .mq-logo{box-shadow:0 0 0 4px #fff}
@@ -421,10 +421,10 @@
   --bg:#ffffff; --surface:#f3f3f1; --fg:#0d0d0d; --muted:#6e6e6a; --line:#e7e7e3;
   --accent:#0d0d0d; --accent-fg:#ffffff; --price:#0d0d0d;
   --display:"Syne",system-ui,sans-serif; --body:"Manrope",system-ui,sans-serif;
-  --display-w:800; --h1:54px; --h2:32px; --name-size:19px; --radius:6px;
+  --display-w:800; --h1:44px; --h2:24px; --name-size:18px; --radius:6px; --h1-fit:10.5cqi;
 }
 .t-galeria .mq-hero{padding:56px 20px 28px}
-.t-galeria .mq-hero h1{text-transform:uppercase;letter-spacing:-.02em;line-height:.92}
+.t-galeria .mq-hero h1{text-transform:uppercase;letter-spacing:-.03em;line-height:.95}
 .t-galeria .mq-hero p{font-size:15px;max-width:34ch}
 .t-galeria .mq-tabs{border-bottom:1px solid var(--fg)}
 .t-galeria .mq-tab{border-radius:0;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.07em}
@@ -432,11 +432,12 @@
 .t-galeria .mq-sec-title,.t-galeria .mq-feat-title{text-transform:uppercase;letter-spacing:-.01em}
 .t-galeria .mq-sec-title{margin-top:40px;padding-bottom:10px;border-bottom:1px solid var(--fg)}
 .t-galeria .mq-name{font-family:var(--display);font-weight:700;letter-spacing:-.01em}
+.t-galeria .mq-tabs-in{gap:2px}
 .t-galeria .mq-price{font-weight:700}
 .t-galeria.layout-list .mq-item{padding:22px 0}
 .t-galeria.layout-list.photos-lg .mq-photo{aspect-ratio:4/3}
 .t-galeria .mq-add,.t-galeria .mq-step,.t-galeria .mq-cartbar,.t-galeria .mq-submit{border-radius:var(--radius)}
 .t-galeria .mq-feat-card{aspect-ratio:3/4}
-.t-galeria .mq-feat-info strong{text-transform:uppercase;font-size:18px;letter-spacing:-.01em}
-.t-galeria .mq-detail-head h2{text-transform:uppercase;letter-spacing:-.01em}
+.t-galeria .mq-feat-info strong{text-transform:uppercase;font-size:15px;letter-spacing:-.01em}
+.t-galeria .mq-detail-head h2{text-transform:uppercase;letter-spacing:-.02em;font-size:22px}
 .t-galeria .mq-acc-head .mq-sec-title{border:0;padding:0;margin:0}

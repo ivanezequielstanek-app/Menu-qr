@@ -46,6 +46,13 @@ npm run dev              # http://localhost:5173
 
 Cada `git push` publica la nueva versión automáticamente para todos los clientes.
 
+## Demo para clientes
+Se publica sola junto con la app en `tudominio.com/demo`. Los clientes pueden cambiar diseños, productos, precios, fotos, ver los QR y armar pedidos: todo queda en memoria y al recargar vuelve al ejemplo. No usa Supabase.
+- Para probarla en tu compu: `npm run dev` y abrí `http://localhost:5173/demo.html`.
+- En `src/lib/brand.js` configurás `MENU_BASE_URL` (dirección que muestran los QR de ejemplo) y `CONTACT` (botón "Quiero mi menú").
+- La dirección `demo` queda reservada: el panel de administrador no deja crear un local con ese nombre.
+- `npm run build:demo` genera además una versión de un solo archivo en `dist-demo/demo.html`.
+
 ## Flujo para un cliente nuevo
 1. `/admin` → **Nuevo cliente** (nombre, dirección, WhatsApp, diseño inicial).
 2. **Diseño** → elegís diseño y opciones con vista previa en vivo → **Publicar cambios**.

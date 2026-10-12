@@ -6,7 +6,7 @@ import { slugify, onlyDigits } from '../../lib/format'
 import { Empty, Modal, Spinner, Switch, useToast } from '../../components/ui'
 import { Plus, Palette, Edit, External, Mail } from '../../components/icons'
 
-const RESERVED = ['login', 'panel', 'admin', 'cuenta', 'api', 'assets']
+const RESERVED = ['login', 'panel', 'admin', 'cuenta', 'api', 'assets', 'demo']
 
 export default function AdminHome() {
   const toast = useToast()
