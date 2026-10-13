@@ -2,7 +2,8 @@
 --  MENÚS DE MUESTRA · 8 locales, uno por diseño
 --  Pegar completo en: Supabase > SQL Editor > New query > Run
 --
---  IMPORTANTE: antes ejecutá migrations/003_sabores.sql (la heladería usa sabores).
+--  IMPORTANTE: antes ejecutá migrations/003_sabores.sql, 004_descripcion_sabores.sql y 005_promos_combinadas.sql
+--  (la heladería usa sabores con descripción).
 --
 --  Crea (o vuelve a crear) estos menús:
 --    /don-ramon      Brasa     (parrilla)
@@ -19,14 +20,15 @@
 --  lo borra (con su menú y sus pedidos) y lo carga de nuevo.
 --  Los productos quedan sin foto: se agregan desde el panel.
 --  Cada producto es: ["Nombre", "Descripción", precio, recomendado, disponible, sabores (opcional)]
---  sabores = {"units": potes, "min": mínimo, "max": máximo, "label": "Pote de 1/4"}
+--  sabores = {"parts":[{"label":"Kilo","min":1,"max":4},{"label":"1/4 de regalo","min":1,"max":3}]}
+--            (o, para potes iguales, {"units":3,"min":1,"max":2,"label":"Pote de 1/4"})
 -- =====================================================================
 
 create or replace function pg_temp.cargar_menu(
   p_slug text, p_name text, p_tagline text, p_theme text, p_options jsonb, p_menu jsonb, p_sabores jsonb default null
 ) returns void language plpgsql as $$
 declare
-  rid uuid; cid uuid; cat jsonb; it jsonb; ci int := 0; pi int; g jsonb; fname text; fi int := 0;
+  rid uuid; cid uuid; cat jsonb; it jsonb; ci int := 0; pi int; g jsonb; fl jsonb; fname text; fdesc text; fi int := 0;
 begin
   delete from restaurants where slug = p_slug;
 
@@ -51,12 +53,15 @@ begin
     ci := ci + 1;
   end loop;
 
-  -- Sabores: [{"grupo":"Cremas","sabores":["Vainilla","Pistacho*"]}]  (* al final = agotado)
+  -- Sabores: [{"grupo":"Cremas","sabores":["Vainilla","Pistacho*",["Chocotorta","Descripción"]]}]
+  -- (* al final del nombre = agotado · ["Nombre","Descripción"] = sabor con descripción)
   if p_sabores is not null then
     for g in select value from jsonb_array_elements(p_sabores) loop
-      for fname in select value from jsonb_array_elements_text(g->'sabores') loop
-        insert into flavors (restaurant_id, name, grp, available, position)
-        values (rid, rtrim(fname, '*'), g->>'grupo', right(fname, 1) <> '*', fi);
+      for fl in select value from jsonb_array_elements(g->'sabores') loop
+        if jsonb_typeof(fl) = 'array' then fname := fl->>0; fdesc := fl->>1;
+        else fname := fl #>> '{}'; fdesc := null; end if;
+        insert into flavors (restaurant_id, name, grp, available, position, description)
+        values (rid, rtrim(fname, '*'), g->>'grupo', right(fname, 1) <> '*', fi, fdesc);
         fi := fi + 1;
       end loop;
     end loop;
@@ -397,7 +402,9 @@ select pg_temp.cargar_menu('heladeria-polar', 'Heladería Polar', 'Helado artesa
    ["1/4 kg","Elegí hasta 2 sabores",5200,false,true,{"units":1,"min":1,"max":2,"label":"1/4 kg"}]]},
  {"categoria":"Promos","productos":[
    ["3x2 en potes de 1/4","Llevá 3 potes de 1/4 y pagá 2. Hasta 2 sabores por pote",10400,true,true,{"units":3,"min":1,"max":2,"label":"Pote de 1/4"}],
-   ["2 kilos","Dos potes de 1 kg con hasta 4 sabores cada uno",30000,true,true,{"units":2,"min":1,"max":4,"label":"Kilo"}]]},
+   ["2 kilos","Dos potes de 1 kg con hasta 4 sabores cada uno",30000,true,true,{"units":2,"min":1,"max":4,"label":"Kilo"}],
+   ["1 kg + 1/4 de regalo","Comprando 1 kg te llevás 1/4 gratis. Elegí los sabores de cada uno",16000,true,true,
+    {"parts":[{"label":"Kilo","min":1,"max":4},{"label":"1/4 de regalo","min":1,"max":3}]}]]},
  {"categoria":"Cucuruchos y vasitos","productos":[
    ["Cucurucho","Hasta 2 sabores",3800,false,true,{"units":1,"min":1,"max":2,"label":"Cucurucho"}],
    ["Vasito","Hasta 2 sabores",3400,false,true,{"units":1,"min":1,"max":2,"label":"Vasito"}]]},
@@ -407,11 +414,11 @@ select pg_temp.cargar_menu('heladeria-polar', 'Heladería Polar', 'Helado artesa
    ["Palito bombón","Crema americana bañada en chocolate",2600,false,true]]}
 ]',
 '[
- {"grupo":"Cremas","sabores":["Crema americana","Vainilla","Frutilla a la crema","Sambayón","Tramontana"]},
+ {"grupo":"Cremas","sabores":["Crema americana","Vainilla","Frutilla a la crema","Sambayón",["Tramontana","Crema con dulce de leche y bombones crocantes"]]},
  {"grupo":"Chocolates","sabores":["Chocolate","Chocolate amargo","Chocolate con almendras","Chocolate suizo"]},
- {"grupo":"Dulce de leche","sabores":["Dulce de leche","Dulce de leche granizado","Súper dulce de leche","Dulce de leche con brownie"]},
+ {"grupo":"Dulce de leche","sabores":["Dulce de leche","Dulce de leche granizado","Súper dulce de leche",["Chocotorta","Dulce de leche con queso crema y galletitas Chocolinas"]]},
  {"grupo":"Frutales","sabores":["Limón","Frutilla al agua","Durazno","Maracuyá","Ananá*"]},
- {"grupo":"Especiales","sabores":["Pistacho*","Menta granizada","Cookies","Banana split"]}
+ {"grupo":"Especiales","sabores":["Pistacho*","Menta granizada",["Cookies","Crema de vainilla con trozos de galletitas de chocolate"],["Banana split","Banana con dulce de leche y salsa de chocolate"]]}
 ]');
 
 
