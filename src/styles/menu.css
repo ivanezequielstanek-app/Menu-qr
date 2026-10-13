@@ -441,3 +441,32 @@
 .t-galeria .mq-feat-info strong{text-transform:uppercase;font-size:15px;letter-spacing:-.01em}
 .t-galeria .mq-detail-head h2{text-transform:uppercase;letter-spacing:-.02em;font-size:22px}
 .t-galeria .mq-acc-head .mq-sec-title{border:0;padding:0;margin:0}
+
+/* ---------- Elegir sabores ---------- */
+.mq-add{position:relative}
+.mq-add-count{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--fg);color:var(--bg);font-size:11.5px;font-weight:700;display:grid;place-items:center;line-height:1}
+.mq-choose{display:inline-block;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--accent);letter-spacing:.01em}
+.mq-line-fl{display:flex;flex-direction:column;gap:2px;margin-top:4px;font-size:13px;font-weight:400;color:var(--muted);line-height:1.35}
+.mq-line-fl b{font-weight:600;color:var(--fg)}
+.mq-fl-sheet{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+.mq-fl-sub{margin:2px 0 10px;color:var(--muted);font-size:14.5px}
+.mq-fl-units{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px;flex:none}
+.mq-fl-units::-webkit-scrollbar{display:none}
+.mq-fl-unit{flex:none;display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13.5px;font-weight:600}
+.mq-fl-unit.is-done{border-color:var(--accent);color:var(--accent)}
+.mq-fl-unit.is-on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.mq-fl-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -20px;padding:2px 20px 12px;border-top:1px solid var(--line)}
+.mq-fl-copy{display:block;width:100%;margin:12px 0 0;padding:11px 14px;border-radius:var(--field-r);border:1px dashed var(--accent);background:transparent;color:var(--accent);font-size:14px;font-weight:600;text-align:left}
+.mq-fl-grp h3{margin:16px 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mq-fl-chips{display:flex;flex-wrap:wrap;gap:7px}
+.mq-fl{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:15px;font-weight:500;transition:background .15s,border-color .15s,transform .1s}
+.mq-fl:active{transform:scale(.96)}
+.mq-fl.is-on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.mq-fl:disabled{opacity:.45;cursor:default;text-decoration:line-through}
+.mq-fl small{font-size:11px;text-decoration:none;opacity:.9}
+.mq-fl-foot{flex:none;margin:0 -20px;padding:10px 20px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--sheet,var(--bg))}
+.mq-fl-status{margin:0;font-size:13.5px;color:var(--muted);min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mq-fl-status.is-warn{color:#e5484d;white-space:normal}
+.mq-fl-foot .mq-submit{margin-top:8px}
+.t-zen .mq-fl,.t-zen .mq-fl-unit{border-radius:3px}
+.t-burger .mq-fl,.t-burger .mq-fl-unit{border-width:2px}

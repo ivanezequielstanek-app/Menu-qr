@@ -21,5 +21,6 @@ export function friendlyError(err) {
   if (m.includes('row-level security') || m.includes('permission')) return 'No tenés permiso para hacer este cambio.'
   if (m.includes('failed to fetch') || m.includes('network')) return 'Sin conexión. Revisá internet e intentá de nuevo.'
   if (m.includes('invalid login')) return 'Email o contraseña incorrectos.'
+  if ((m.includes('choice') || m.includes('flavors')) && (m.includes('column') || m.includes('does not exist') || m.includes('schema cache'))) return 'Falta activar los sabores: ejecutá 003_sabores.sql en Supabase.'
   return err?.message || 'Ocurrió un error inesperado.'
 }

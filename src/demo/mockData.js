@@ -73,13 +73,32 @@ function tumbler(bg, liquid, fruit = '#ffffff') {
   <circle cx="160" cy="124" r="30" fill="${fruit}"/><circle cx="160" cy="124" r="22" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3"/>`, bg)
 }
 
-function build(restaurant, cats) {
+// Helado: pote (cup) o cucurucho (cone) con bochas de colores
+function helado(bg, scoops, kind = 'cup') {
+  const pos = scoops.length === 1 ? [[200, 170]] : scoops.length === 2 ? [[170, 178], [232, 172]]
+    : scoops.length === 3 ? [[160, 186], [240, 186], [200, 140]] : [[150, 192], [250, 192], [178, 140], [226, 136]]
+  const balls = scoops.map((c, i) => {
+    const [x, y] = pos[i % pos.length]
+    return `<circle cx="${x}" cy="${y}" r="52" fill="${c}"/><circle cx="${x - 16}" cy="${y - 18}" r="12" fill="rgba(255,255,255,.35)"/>`
+  }).join('')
+  const base = kind === 'cone'
+    ? `<path d="M140 214h120l-60 140z" fill="#d9a35a"/><path d="M150 232l84 0M160 256l70 0M170 280l54 0M182 304l32 0" stroke="#b9823f" stroke-width="5"/>`
+    : `<path d="M118 214h164l-18 120H136z" fill="#ffffff" stroke="rgba(0,0,0,.08)" stroke-width="3"/><rect x="112" y="204" width="176" height="20" rx="6" fill="#f06a9b"/>`
+  return svg(`<ellipse cx="200" cy="350" rx="96" ry="12" fill="rgba(0,0,0,.12)"/>${balls}${base}`, bg)
+}
+
+function build(restaurant, cats, extra = {}) {
   const categories = cats.map((c, i) => ({ id: `c${i}`, name: c.name, position: i, visible: true }))
   const products = cats.flatMap((c, ci) => c.items.map((it, ii) => ({
     id: `p${ci}-${ii}`, category_id: `c${ci}`, position: ii,
     name: it[0], description: it[1], price: it[2], image_url: it[3], available: it[4] !== false, featured: it[5] === true,
+    choice: it[6] || null,
   })))
-  return { restaurant, categories, products }
+  const flavors = (extra.flavors || []).flatMap(([grp, names], gi) => names.map((n, i) => {
+    const out = n.endsWith('*') // un asterisco al final = agotado
+    return { id: `f${gi}-${i}`, name: out ? n.slice(0, -1) : n, grp, available: !out, position: gi * 100 + i }
+  }))
+  return { restaurant, categories, products, flavors, theme: extra.theme }
 }
 
 const SAMPLES = {
@@ -241,6 +260,44 @@ const SAMPLES = {
       ] },
     ])
   },
+}
+
+
+// Heladería: usa el diseño Café y muestra la elección de sabores
+SAMPLES.heladeria = () => {
+  const bg = '#f6e3e8', bg2 = '#e3efe7'
+  const H = (sc, kind, b = bg) => helado(b, sc, kind)
+  const kilo = (max, label) => ({ units: 1, min: 1, max, label })
+  return build({ name: 'Heladería Polar', tagline: 'Helado artesanal desde 1994', whatsapp: '5491100000000' }, [
+    { name: 'Helado por peso', items: [
+      ['1 kg', 'Elegí hasta 4 sabores', 16000, H(['#6b3a2a', '#f3d9a4', '#f28cb0', '#fff4d6'], 'cup'), true, true, kilo(4, 'Kilo')],
+      ['1/2 kg', 'Elegí hasta 3 sabores', 9000, H(['#c98b4b', '#f28cb0', '#fff4d6'], 'cup', bg2), true, false, kilo(3, '1/2 kg')],
+      ['1/4 kg', 'Elegí hasta 2 sabores', 5200, H(['#6b3a2a', '#f7e98a'], 'cup'), true, false, kilo(2, '1/4 kg')],
+    ] },
+    { name: 'Promos', items: [
+      ['3x2 en potes de 1/4', 'Llevá 3 potes de 1/4 y pagá 2. Hasta 2 sabores por pote', 10400, H(['#f28cb0', '#6b3a2a', '#9ed6a5'], 'cup', bg2), true, true, { units: 3, min: 1, max: 2, label: 'Pote de 1/4' }],
+      ['2 kilos', 'Dos potes de 1 kg con hasta 4 sabores cada uno', 30000, H(['#c98b4b', '#fff4d6', '#6b3a2a', '#f7e98a'], 'cup'), true, true, { units: 2, min: 1, max: 4, label: 'Kilo' }],
+    ] },
+    { name: 'Cucuruchos y vasitos', items: [
+      ['Cucurucho', 'Hasta 2 sabores', 3800, H(['#f3d9a4', '#6b3a2a'], 'cone', bg2), true, false, kilo(2, 'Cucurucho')],
+      ['Vasito', 'Hasta 2 sabores', 3400, H(['#f28cb0', '#fff4d6'], 'cup'), true, false, kilo(2, 'Vasito')],
+    ] },
+    { name: 'Postres helados', items: [
+      ['Almendrado', 'Porción, con almendras tostadas', 4800, P2(['#f3d9a4', '#c98b4b', '#fff4d6'])],
+      ['Bombón escocés', 'Unidad, bañado en chocolate', 3900, P2(['#3b2016', '#6b3a2a', '#f3d9a4'])],
+      ['Palito bombón', 'Crema americana bañada en chocolate', 2600, P2(['#3b2016', '#fff4d6'])],
+    ] },
+  ], {
+    theme: 'cafe',
+    flavors: [
+      ['Cremas', ['Crema americana', 'Vainilla', 'Frutilla a la crema', 'Sambayón', 'Tramontana']],
+      ['Chocolates', ['Chocolate', 'Chocolate amargo', 'Chocolate con almendras', 'Chocolate suizo']],
+      ['Dulce de leche', ['Dulce de leche', 'Dulce de leche granizado', 'Súper dulce de leche', 'Dulce de leche con brownie']],
+      ['Frutales', ['Limón', 'Frutilla al agua', 'Durazno', 'Maracuyá', 'Ananá*']],
+      ['Especiales', ['Pistacho*', 'Menta granizada', 'Cookies', 'Banana split']],
+    ],
+  })
+  function P2(c) { return plate(Math.round(c.length * 17), bg, c) }
 }
 
 const cache = {}

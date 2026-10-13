@@ -63,7 +63,7 @@ export default function DemoMenuEditor() {
       {editing && (
         <ProductFormView categories={[...state.categories].sort((a, b) => a.position - b.position)}
           product={editing.product} defaultCategory={editing.category_id}
-          onClose={() => setEditing(null)} onSubmit={saveProduct} />
+          onClose={() => setEditing(null)} onSubmit={saveProduct} flavorsCount={state.flavors.length} />
       )}
       {catModal && <CategoryModalView cat={catModal.cat} onClose={() => setCatModal(null)} onSubmit={saveCategory} />}
     </>

@@ -4,14 +4,16 @@ import { supabase, friendlyError } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import AppShell from '../components/AppShell'
 import { Empty, Spinner } from '../components/ui'
-import { External, Edit, Bell, Store, QrIcon } from '../components/icons'
+import { External, Edit, Bell, Store, QrIcon, IceCream } from '../components/icons'
 import MenuEditor from './panel/MenuEditor'
 import Orders from './panel/Orders'
 import Settings from './panel/Settings'
 import QrCodes from './panel/QrCodes'
+import Flavors from './panel/Flavors'
 
 const TABS = [
   ['menu', 'Menú', Edit, 'Menú'],
+  ['sabores', 'Sabores', IceCream, 'Sabores'],
   ['pedidos', 'Pedidos', Bell, 'Pedidos'],
   ['local', 'Mi local', Store, 'Local'],
   ['qr', 'Códigos QR', QrIcon, 'QR'],
@@ -76,6 +78,7 @@ export default function OwnerPanel() {
         ))}
       </nav>
       {tab === 'menu' && <MenuEditor key={rid} restaurant={restaurant} />}
+      {tab === 'sabores' && <Flavors key={rid} restaurant={restaurant} />}
       {tab === 'pedidos' && <Orders key={rid} restaurant={restaurant} />}
       {tab === 'local' && <Settings key={rid} restaurant={restaurant} onSaved={load} />}
       {tab === 'qr' && <QrCodes key={rid} restaurant={restaurant} />}

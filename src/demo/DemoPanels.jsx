@@ -6,7 +6,8 @@ import { themeById } from '../lib/designs'
 import { MENU_BASE_URL } from '../lib/brand'
 import { ConfirmModal, Empty, Segmented, useToast } from '../components/ui'
 import PhotoPicker from '../components/PhotoPicker'
-import { useDemo } from './store'
+import { useDemo, uid } from './store'
+import FlavorsEditorView from '../components/FlavorsEditorView'
 
 /* ---------------- Mi local ---------------- */
 export function DemoSettings() {
@@ -210,7 +211,7 @@ export function DemoOrders({ onGoPreview }) {
                 {o.address && <p className="order-addr">{o.address}</p>}
                 <ul className="order-items">
                   {o.order_items.map((it) => (
-                    <li key={it.id}><b>{it.qty}×</b> {it.name}<span>{money(it.unit_price * it.qty)}</span></li>
+                    <li key={it.id}><b>{it.qty}×</b> <div className="oi-name">{it.name}{it.details && <small>{it.details.split(' · ').map((d, k) => <i key={k}>{d}</i>)}</small>}</div><span>{money(it.unit_price * it.qty)}</span></li>
                   ))}
                 </ul>
                 {o.notes && <p className="order-notes">{o.notes}</p>}
@@ -234,3 +235,30 @@ export function DemoOrders({ onGoPreview }) {
   )
 }
 
+
+/* ---------------- Sabores ---------------- */
+export function DemoFlavors() {
+  const { state, update } = useDemo()
+  const toast = useToast()
+  return (
+    <FlavorsEditorView
+      flavors={state.flavors}
+      onAdd={(items) => {
+        update('flavors', (l) => {
+          const start = l.reduce((m, f) => Math.max(m, f.position ?? 0), -1) + 1
+          return [...l, ...items.map((x, i) => ({ id: uid('f'), name: x.name, grp: x.grp, available: true, position: start + i }))]
+        })
+        toast(items.length === 1 ? 'Sabor agregado' : `${items.length} sabores agregados`)
+      }}
+      onPatch={(f, patch) => update('flavors', (l) => l.map((x) => (x.id === f.id ? { ...x, ...patch } : x)))}
+      onDelete={(f) => { update('flavors', (l) => l.filter((x) => x.id !== f.id)); toast('Sabor eliminado') }}
+      onMove={(group, i, dir) => {
+        const j = i + dir
+        if (j < 0 || j >= group.length) return
+        const a = group[i], b = group[j]
+        update('flavors', (l) => l.map((x) => (x.id === a.id ? { ...x, position: b.position } : x.id === b.id ? { ...x, position: a.position } : x)))
+      }}
+      onAllAvailable={() => { update('flavors', (l) => l.map((x) => ({ ...x, available: true }))); toast('Todos los sabores disponibles') }}
+    />
+  )
+}

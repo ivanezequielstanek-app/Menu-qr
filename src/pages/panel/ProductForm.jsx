@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase, friendlyError, BUCKET } from '../../lib/supabase'
 import { ProductFormView } from '../../components/MenuEditorView'
 
@@ -7,11 +7,18 @@ import { ProductFormView } from '../../components/MenuEditorView'
 export default function ProductForm({ restaurantId, categories, products, product, defaultCategory, onClose, onSaved }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [flavorsCount, setFlavorsCount] = useState(null)
+  useEffect(() => {
+    supabase.from('flavors').select('id', { count: 'exact', head: true }).eq('restaurant_id', restaurantId)
+      .then(({ count, error: e }) => setFlavorsCount(e ? null : count ?? 0))
+  }, [restaurantId])
 
   async function submit({ values, photo }) {
     setError(''); setSaving(true)
     try {
       const payload = { ...values, updated_at: new Date().toISOString() }
+      // Si el producto no usa sabores, no mandamos la columna (así funciona aunque falte la migración 003)
+      if (!values.choice && !product?.choice) delete payload.choice
       let id = product?.id
       if (!id) {
         const position = products.filter((p) => p.category_id === values.category_id).length
@@ -50,6 +57,6 @@ export default function ProductForm({ restaurantId, categories, products, produc
 
   return (
     <ProductFormView categories={categories} product={product} defaultCategory={defaultCategory}
-      onClose={onClose} onSubmit={submit} saving={saving} error={error} />
+      onClose={onClose} onSubmit={submit} saving={saving} error={error} flavorsCount={flavorsCount} />
   )
 }

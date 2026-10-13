@@ -113,7 +113,7 @@ export default function Orders({ restaurant }) {
                 {o.address && <p className="order-addr">{o.address}</p>}
                 <ul className="order-items">
                   {(o.order_items || []).map((it) => (
-                    <li key={it.id}><b>{it.qty}×</b> {it.name}<span>{money(it.unit_price * it.qty)}</span></li>
+                    <li key={it.id}><b>{it.qty}×</b> <div className="oi-name">{it.name}{it.details && <small>{it.details.split(' · ').map((d, k) => <i key={k}>{d}</i>)}</small>}</div><span>{money(it.unit_price * it.qty)}</span></li>
                   ))}
                 </ul>
                 {o.notes && <p className="order-notes">{o.notes}</p>}

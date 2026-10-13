@@ -16,11 +16,12 @@ export default function PublicMenu() {
         .select('id, slug, name, tagline, whatsapp, logo_path').eq('slug', slug).maybeSingle()
       if (!alive) return
       if (error || !r) return setState({ status: 'missing' })
-      const [d, c, p] = await Promise.all([
+      const [d, c, p, f] = await Promise.all([
         supabase.from('restaurant_design').select('theme, options').eq('restaurant_id', r.id).maybeSingle(),
         supabase.from('categories').select('id, name, position, visible').eq('restaurant_id', r.id).order('position'),
-        supabase.from('products').select('id, category_id, name, description, price, image_path, available, featured, position')
+        supabase.from('products').select('*') // '*' para que funcione aunque falte alguna columna nueva
           .eq('restaurant_id', r.id).order('position'),
+        supabase.from('flavors').select('id, name, grp, available, position').eq('restaurant_id', r.id).order('position'),
       ])
       if (!alive) return
       setState({
@@ -30,6 +31,7 @@ export default function PublicMenu() {
         options: d.data?.options || {},
         categories: c.data || [],
         products: (p.data || []).map((x) => ({ ...x, image_url: imageUrl(x.image_path) })),
+        flavors: f.data || [], // si todavía no se ejecutó la migración 003, queda vacío y el menú funciona igual
       })
     }
     load()
@@ -64,7 +66,7 @@ export default function PublicMenu() {
   return (
     <MenuView
       restaurant={state.restaurant} theme={state.theme} options={state.options}
-      categories={state.categories} products={state.products}
+      categories={state.categories} products={state.products} flavors={state.flavors}
       initialTable={params.get('mesa') || ''} onSubmitOrder={submitOrder}
     />
   )

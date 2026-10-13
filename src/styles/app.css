@@ -274,7 +274,7 @@ textarea.input{resize:vertical}
 .theme-cards-compact .theme-card small{display:none}
 .theme-cards-compact .theme-card{align-items:center;padding:10px 6px}
 .preview{display:flex;flex-direction:column;align-items:center;gap:14px}
-.device{position:relative;width:390px;max-width:100%;height:min(780px,calc(100vh - 190px));min-height:520px;border-radius:34px;overflow:hidden;
+.device{position:relative;isolation:isolate;width:390px;max-width:100%;height:min(780px,calc(100vh - 190px));min-height:520px;border-radius:34px;overflow:hidden;
   box-shadow:0 0 0 9px #1b1d1f,0 0 0 10px #3a3d40,0 30px 60px -20px rgba(0,0,0,.45);background:#000;transition:width .3s}
 .device-tablet{width:720px;border-radius:24px}
 .device-toast{position:absolute;left:14px;right:14px;top:14px;z-index:150;background:#1fa855;color:#fff;padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;text-align:center;animation:rise .2s;font-family:var(--font)}
@@ -391,4 +391,31 @@ textarea.input{resize:vertical}
   .product-form .photo-drop{aspect-ratio:16/10}
   .photo-side .btn{flex:1 1 0}
   .form-grid{gap:4px}
+}
+
+/* ---------- Sabores ---------- */
+.prod-choice{font-size:12px;font-weight:700;color:var(--info)}
+.choice-box{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.choice-box.is-on{border-color:color-mix(in srgb,var(--brand) 45%,var(--line));background:var(--brand-soft)}
+.choice-box .field-row{margin-top:12px}
+.choice-box .field{margin-bottom:8px}
+.choice-box .hint{margin:2px 0 0}
+.form-warn{margin:8px 0 0;padding:8px 10px;border-radius:8px;background:var(--warn-soft);color:var(--warn);font-size:13.5px}
+.order-items li{align-items:flex-start}
+.oi-name{flex:1;min-width:0}
+.oi-name small{display:flex;flex-direction:column;margin-top:2px;color:var(--muted);font-size:12.5px;line-height:1.35}
+.oi-name small i{font-style:normal}
+.fl-add{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:12px;align-items:end;margin-bottom:16px;padding:14px 16px}
+.fl-add .field{margin:0}
+.fl-row{gap:10px}
+.fl-name{flex:1;min-width:0;text-align:left;border:0;background:none;padding:8px 6px;border-radius:8px;font-weight:600;font-size:15px;color:var(--ink);cursor:pointer}
+.fl-name:hover{background:var(--surface-2)}
+.fl-row.is-out .fl-name{color:var(--muted);text-decoration:line-through}
+.fl-tools{padding-left:0!important}
+@media (max-width:720px){
+  .fl-add{grid-template-columns:1fr}
+  .fl-add .btn{width:100%}
+  .fl-row{flex-wrap:nowrap}
+  .fl-tools .row-actions .icon-btn:nth-child(-n+2){display:none}
+  .fl-tools{width:auto!important}
 }

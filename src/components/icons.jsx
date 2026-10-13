@@ -37,3 +37,4 @@ export const Star = ({ filled, ...p }) => (
     d={<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z" />} />
 )
 export const Tag = (p) => <I {...p} d={<><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="8.5" r="1.5" /></>} />
+export const IceCream = (p) => <I {...p} d={<><path d="M7 10a5 5 0 0 1 10 0" /><path d="M6 10h12l-6 11z" /><path d="M9.5 13.5l5 0" /></>} />

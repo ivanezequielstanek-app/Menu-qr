@@ -11,10 +11,10 @@ import { waLink } from './lib/format'
 import DesignControls from './components/DesignControls'
 import PhonePreview from './components/PhonePreview'
 import { ToastProvider, useToast } from './components/ui'
-import { Edit, Bell, Store, QrIcon, Palette, Eye, External, Close } from './components/icons'
+import { Edit, Bell, Store, QrIcon, Palette, Eye, External, Close, IceCream } from './components/icons'
 import { DemoProvider, SAMPLE_LIST, useDemo } from './demo/store'
 import DemoMenuEditor from './demo/DemoMenuEditor'
-import { DemoSettings, DemoQr, DemoOrders } from './demo/DemoPanels'
+import { DemoSettings, DemoQr, DemoOrders, DemoFlavors } from './demo/DemoPanels'
 
 function useWide(query = '(min-width: 1100px)') {
   const [wide, setWide] = useState(() => window.matchMedia?.(query).matches ?? true)
@@ -31,7 +31,7 @@ function useWide(query = '(min-width: 1100px)') {
 function LivePreview({ onExpand, initialDevice }) {
   const { state, update, addOrder } = useDemo()
   const toast = useToast()
-  const { restaurant, design, categories, products, table } = state
+  const { restaurant, design, categories, products, flavors, table } = state
   async function submit(order) {
     await addOrder(order)
     toast('Llegó un pedido nuevo · miralo en Pedidos')
@@ -45,7 +45,7 @@ function LivePreview({ onExpand, initialDevice }) {
         </div>
       )}
       <PhonePreview restaurant={restaurant} theme={design.theme} options={design.options} initialDevice={initialDevice}
-        categories={categories} products={products} initialTable={table} onSubmitOrder={submit} />
+        categories={categories} products={products} flavors={flavors} initialTable={table} onSubmitOrder={submit} />
       {onExpand && (
         <button type="button" className="btn btn-secondary btn-sm demo-expand" onClick={onExpand}><External /> Ver en pantalla completa</button>
       )}
@@ -101,10 +101,13 @@ function Demo() {
   const unseen = state.orders.filter((o) => o.fresh).length
 
   useEffect(() => { if (wide && tab === 'preview') setTab('menu') }, [wide, tab])
+  const hasFlavorsTab = state.flavors.length > 0 || state.sample === 'heladeria'
+  useEffect(() => { if (tab === 'flavors' && !hasFlavorsTab) setTab('menu') }, [tab, hasFlavorsTab])
 
   const tabs = [
     ...(wide ? [] : [['preview', 'Vista previa', Eye, 'Ver']]),
     ['menu', 'Menú', Edit, 'Menú'],
+    ...(state.flavors.length || state.sample === 'heladeria' ? [['flavors', 'Sabores', IceCream, 'Sabores']] : []),
     ['design', 'Diseño', Palette, 'Diseño'],
     ['local', 'Mi local', Store, 'Local'],
     ['qr', 'Códigos QR', QrIcon, 'QR'],
@@ -149,6 +152,7 @@ function Demo() {
             </nav>
             {tab === 'preview' && <LivePreview onExpand={phone ? null : () => setFull(true)} />}
             {tab === 'menu' && <DemoMenuEditor />}
+            {tab === 'flavors' && <DemoFlavors />}
             {tab === 'design' && (
               <div>
                 <div className="page-head"><div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { resolveOptions } from '../lib/designs'
 import { money, readableOn, waLink } from '../lib/format'
+import { choiceOf, groupFlavors, rangeText, unitLabel } from '../lib/flavors'
 import { Plus, Close, Chevron, Check, WhatsApp, Left, Right } from '../components/icons'
 
 const TYPES = [
@@ -15,7 +16,7 @@ const TYPE_LABEL = { mesa: 'Consumo en el local', retiro: 'Retira en el local', 
  * editor de diseño (embedded) y en la demo.
  */
 export default function MenuView({
-  restaurant, theme = 'elegante', options, categories = [], products = [],
+  restaurant, theme = 'elegante', options, categories = [], products = [], flavors = [],
   embedded = false, initialTable = '', onSubmitOrder, onOpenWhatsApp,
 }) {
   const o = resolveOptions(theme, options)
@@ -37,7 +38,10 @@ export default function MenuView({
   const flat = useMemo(() => sections.flatMap((s) => s.items), [sections])
   const featured = useMemo(() => (o.showFeatured ? flat.filter((p) => p.featured).slice(0, 12) : []), [flat, o.showFeatured])
   const [detail, setDetail] = useState(null) // { list: 'all' | 'feat', i, dir }
-  const [cart, setCart] = useState({})
+  const [cart, setCart] = useState({}) // clave → { pid, q, flavors }
+  const [picker, setPicker] = useState(null) // producto al que se le eligen sabores
+  const flavorName = useMemo(() => Object.fromEntries(flavors.map((f) => [f.id, f.name])), [flavors])
+  const needsFlavors = (p) => flavors.length > 0 && !!choiceOf(p)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [active, setActive] = useState(null)
   const [openCats, setOpenCats] = useState(() => new Set())
@@ -48,14 +52,21 @@ export default function MenuView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [o.categoryMode, sections.length])
 
-  const lines = Object.entries(cart).map(([id, q]) => ({ p: byId[id], q })).filter((l) => l.p && l.q > 0)
+  const lines = Object.entries(cart).map(([key, l]) => ({ key, p: byId[l.pid], q: l.q, flavors: l.flavors }))
+    .filter((l) => l.p && l.q > 0)
   const count = lines.reduce((s, l) => s + l.q, 0)
   const total = lines.reduce((s, l) => s + Number(l.p.price) * l.q, 0)
   const hasWa = o.whatsapp && !!restaurant?.whatsapp
   const enabledTypes = TYPES.filter(([, key]) => o.orderTypes[key]).map(([t]) => t)
   const canOrder = o.ordering && enabledTypes.length > 0
 
-  const add = (id, n = 1) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + n }))
+  const keyOf = (pid, fl) => (fl ? `${pid}|${fl.map((u) => u.join(',')).join('/')}` : String(pid))
+  const add = (pid, n = 1, fl = null) => setCart((c) => {
+    const k = keyOf(pid, fl)
+    return { ...c, [k]: { pid, flavors: fl, q: (c[k]?.q || 0) + n } }
+  })
+  const inc = (k) => setCart((c) => (c[k] ? { ...c, [k]: { ...c[k], q: c[k].q + 1 } } : c))
+  const qtyOf = (pid) => Object.values(cart).reduce((s, l) => (l.pid === pid ? s + l.q : s), 0)
   const openDetail = (list, i) => setDetail({ list, i, dir: 0 })
   const detailItems = detail?.list === 'feat' ? featured : flat
   function navDetail(step) {
@@ -65,9 +76,10 @@ export default function MenuView({
       return i < 0 || i >= len ? d : { ...d, i, dir: step }
     })
   }
-  const sub = (id) => setCart((c) => {
-    const n = { ...c }; n[id] = (n[id] || 0) - 1
-    if (n[id] <= 0) delete n[id]
+  const sub = (k) => setCart((c) => {
+    if (!c[k]) return c
+    const n = { ...c }; const q = n[k].q - 1
+    if (q <= 0) delete n[k]; else n[k] = { ...n[k], q }
     return n
   })
 
@@ -88,11 +100,11 @@ export default function MenuView({
   }, [active])
 
   useEffect(() => {
-    if (embedded || (!sheetOpen && !detail)) return
+    if (embedded || (!sheetOpen && !detail && !picker)) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
-  }, [sheetOpen, detail, embedded])
+  }, [sheetOpen, detail, picker, embedded])
 
   function goTo(id) {
     const el = secRefs.current[id]
@@ -108,7 +120,8 @@ export default function MenuView({
   }
 
   function renderItem(p) {
-    const q = cart[p.id] || 0
+    const q = qtyOf(p.id)
+    const pick = needsFlavors(p)
     const out = p.available === false
     const img = p.image_url
     const showPhoto = o.photoSize !== 'none' && (img || o.layout === 'grid')
@@ -134,11 +147,16 @@ export default function MenuView({
             <span className="mq-price">{money(p.price)}</span>
           </div>
           {o.showDescriptions && p.description && <p className="mq-desc">{p.description}</p>}
+          {pick && !out && <span className="mq-choose">{choiceOf(p).units > 1 ? `${choiceOf(p).units} × ` : ''}{rangeText(choiceOf(p))}</span>}
           {out && <span className="mq-out">Agotado</span>}
         </div>
         {canOrder && !out && (
           <div className="mq-actions">
-            {q === 0 ? (
+            {pick ? (
+              <button type="button" className="mq-add" onClick={() => setPicker(p)} aria-label={`Elegir sabores de ${p.name}`}>
+                <Plus />{q > 0 && <span className="mq-add-count">{q}</span>}
+              </button>
+            ) : q === 0 ? (
               <button type="button" className="mq-add" onClick={() => add(p.id)} aria-label={`Agregar ${p.name}`}><Plus /></button>
             ) : (
               <div className="mq-step">
@@ -248,14 +266,18 @@ export default function MenuView({
       {detail && detailItems[detail.i] && (
         <Detail
           items={detailItems} index={detail.i} dir={detail.dir} canOrder={canOrder}
-          inCart={cart[detailItems[detail.i].id] || 0}
-          onAdd={add} onNav={navDetail} onClose={() => setDetail(null)}
+          inCart={qtyOf(detailItems[detail.i].id)} needsFlavors={needsFlavors(detailItems[detail.i])}
+          onAdd={add} onPick={(p) => { setDetail(null); setPicker(p) }} onNav={navDetail} onClose={() => setDetail(null)}
         />
+      )}
+      {picker && (
+        <FlavorPicker product={picker} flavors={flavors} onClose={() => setPicker(null)}
+          onConfirm={(picks) => { add(picker.id, 1, picks); setPicker(null) }} />
       )}
       {sheetOpen && (
         <Checkout
           restaurant={restaurant} lines={lines} total={total} types={enabledTypes} hasWa={hasWa}
-          initialTable={initialTable} onAdd={add} onSub={sub}
+          initialTable={initialTable} onAdd={inc} onSub={sub} flavorName={flavorName}
           onClose={() => setSheetOpen(false)} onDone={() => setCart({})}
           onSubmitOrder={onSubmitOrder} onOpenWhatsApp={onOpenWhatsApp}
         />
@@ -264,7 +286,7 @@ export default function MenuView({
   )
 }
 
-function Detail({ items, index, dir, canOrder, inCart, onAdd, onNav, onClose }) {
+function Detail({ items, index, dir, canOrder, inCart, needsFlavors, onAdd, onPick, onNav, onClose }) {
   const p = items[index]
   const out = p.available === false
   const [qty, setQty] = useState(1)
@@ -309,7 +331,14 @@ function Detail({ items, index, dir, canOrder, inCart, onAdd, onNav, onClose }) 
             {p.description && <p className="mq-detail-desc">{p.description}</p>}
             {out && <span className="mq-out">Agotado</span>}
             {inCart > 0 && <p className="mq-detail-incart">Ya tenés {inCart} en tu pedido</p>}
-            {canOrder && !out && (
+            {canOrder && !out && needsFlavors && (
+              <div className="mq-detail-actions">
+                <button type="button" className="mq-submit mq-detail-add" onClick={() => onPick(p)}>
+                  Elegir sabores · {money(p.price)}
+                </button>
+              </div>
+            )}
+            {canOrder && !out && !needsFlavors && (
               <div className="mq-detail-actions">
                 <div className="mq-mini-step mq-big-step">
                   <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Menos">−</button>
@@ -329,18 +358,22 @@ function Detail({ items, index, dir, canOrder, inCart, onAdd, onNav, onClose }) 
   )
 }
 
-function buildMessage(restaurant, order, lines, total) {
+function buildMessage(restaurant, order, lines, total, flavorName) {
   const out = [`*Nuevo pedido · ${restaurant.name}*`, TYPE_LABEL[order.type] + (order.type === 'mesa' ? ` · Mesa ${order.table}` : '')]
   if (order.name) out.push(`Cliente: ${order.name}`)
   if (order.type === 'delivery') out.push(`Dirección: ${order.address}`)
   out.push('')
-  lines.forEach((l) => out.push(`${l.q} × ${l.p.name} — ${money(Number(l.p.price) * l.q)}`))
+  lines.forEach((l) => {
+    out.push(`${l.q} × ${l.p.name} — ${money(Number(l.p.price) * l.q)}`)
+    const c = l.flavors && choiceOf(l.p)
+    if (c) l.flavors.forEach((ids, i) => out.push(`   ${unitLabel(c, i)}: ${ids.map((id) => flavorName[id] || '?').join(', ')}`))
+  })
   out.push('', `*Total: ${money(total)}*`)
   if (order.notes) out.push('', `Aclaraciones: ${order.notes}`)
   return out.join('\n')
 }
 
-function Checkout({ restaurant, lines, total, types, hasWa, initialTable, onAdd, onSub, onClose, onDone, onSubmitOrder, onOpenWhatsApp }) {
+function Checkout({ restaurant, lines, total, types, hasWa, initialTable, onAdd, onSub, flavorName, onClose, onDone, onSubmitOrder, onOpenWhatsApp }) {
   const [type, setType] = useState(initialTable && types.includes('mesa') ? 'mesa' : types[0])
   const [table, setTable] = useState(initialTable || '')
   const [name, setName] = useState('')
@@ -364,16 +397,18 @@ function Checkout({ restaurant, lines, total, types, hasWa, initialTable, onAdd,
     setError(''); setSending(true)
     const order = {
       type, table: table.trim(), name: name.trim(), address: address.trim(), notes: notes.trim(),
-      items: lines.map((l) => ({ product_id: l.p.id, qty: l.q })),
+      items: lines.map((l) => ({ product_id: l.p.id, qty: l.q, ...(l.flavors ? { flavors: l.flavors } : {}) })),
     }
     try {
       await onSubmitOrder?.(order)
     } catch (err) {
       console.error(err)
       setSending(false)
-      return setError('No pudimos enviar el pedido. Revisá tu conexión e intentá de nuevo.')
+      const msg = String(err?.message || '')
+      return setError(/sabor|disponible/i.test(msg) ? `${msg}. Actualizá tu pedido y probá de nuevo.`
+        : 'No pudimos enviar el pedido. Revisá tu conexión e intentá de nuevo.')
     }
-    const url = hasWa ? waLink(restaurant.whatsapp, buildMessage(restaurant, order, lines, total)) : null
+    const url = hasWa ? waLink(restaurant.whatsapp, buildMessage(restaurant, order, lines, total, flavorName)) : null
     setSent({ url })
     setSending(false)
     onDone()
@@ -400,12 +435,18 @@ function Checkout({ restaurant, lines, total, types, hasWa, initialTable, onAdd,
             </div>
             <ul className="mq-lines">
               {lines.map((l) => (
-                <li key={l.p.id} className="mq-line">
-                  <div className="mq-line-name">{l.p.name}<small>{money(l.p.price)} c/u</small></div>
+                <li key={l.key} className="mq-line">
+                  <div className="mq-line-name">{l.p.name}<small>{money(l.p.price)} c/u</small>
+                    {l.flavors && choiceOf(l.p) && (
+                      <span className="mq-line-fl">{l.flavors.map((ids, i) => (
+                        <span key={i}><b>{unitLabel(choiceOf(l.p), i)}:</b> {ids.map((id) => flavorName[id] || '?').join(', ')}</span>
+                      ))}</span>
+                    )}
+                  </div>
                   <div className="mq-mini-step">
-                    <button type="button" onClick={() => onSub(l.p.id)} aria-label="Quitar uno">−</button>
+                    <button type="button" onClick={() => onSub(l.key)} aria-label="Quitar uno">−</button>
                     <span>{l.q}</span>
-                    <button type="button" onClick={() => onAdd(l.p.id)} aria-label="Agregar uno">+</button>
+                    <button type="button" onClick={() => onAdd(l.key)} aria-label="Agregar uno igual">+</button>
                   </div>
                 </li>
               ))}
@@ -442,6 +483,107 @@ function Checkout({ restaurant, lines, total, types, hasWa, initialTable, onAdd,
             </button>
           </form>
         )}
+      </div>
+    </div>
+  )
+}
+
+/* ---------- Elegir sabores (helados por kilo, promos de potes…) ---------- */
+function FlavorPicker({ product, flavors, onClose, onConfirm }) {
+  const c = choiceOf(product)
+  const [picks, setPicks] = useState(() => Array.from({ length: c.units }, () => []))
+  const [u, setU] = useState(0)
+  const [warn, setWarn] = useState('')
+  const groups = useMemo(() => groupFlavors(flavors), [flavors])
+  const bodyRef = useRef(null)
+  const done = (i) => picks[i].length >= c.min
+  const firstMissing = picks.findIndex((x) => x.length < c.min)
+  const complete = firstMissing === -1
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+  const unitsRef = useRef(null)
+  useEffect(() => {
+    setWarn(''); bodyRef.current?.scrollTo({ top: 0 })
+    const el = unitsRef.current?.children[u]
+    if (el) unitsRef.current.scrollTo({ left: el.offsetLeft - 20, behavior: 'smooth' })
+  }, [u])
+
+  function toggle(f) {
+    if (f.available === false) return
+    const cur = picks[u]
+    if (!cur.includes(f.id) && cur.length >= c.max) {
+      setWarn(`Ya elegiste ${c.max} ${c.max === 1 ? 'sabor' : 'sabores'}${c.units > 1 ? ' en este pote' : ''}. Tocá uno para cambiarlo.`)
+      return
+    }
+    setWarn('')
+    const next = picks.map((x, i) => (i !== u ? x : x.includes(f.id) ? x.filter((id) => id !== f.id) : [...x, f.id]))
+    setPicks(next)
+    // Pote lleno: pasa solo al siguiente que esté vacío
+    if (next[u].length === c.max && u < c.units - 1 && next[u + 1].length === 0) setTimeout(() => setU(u + 1), 280)
+  }
+  const copyPrev = () => setPicks((ps) => ps.map((x, i) => (i === u ? [...ps[u - 1]] : x)))
+
+  return (
+    <div className="mq-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="mq-sheet mq-fl-sheet" role="dialog" aria-modal="true" aria-label={`Sabores de ${product.name}`}>
+        <div className="mq-grip" />
+        <div className="mq-sheet-head">
+          <h2>{product.name}</h2>
+          <button type="button" className="mq-close" onClick={onClose} aria-label="Cerrar"><Close /></button>
+        </div>
+        <p className="mq-fl-sub">
+          {c.units > 1 ? `Son ${c.units} · elegí ${rangeText(c)} en cada uno` : `Elegí ${rangeText(c)}`}
+        </p>
+
+        {c.units > 1 && (
+          <div className="mq-fl-units" role="tablist" aria-label="Unidades" ref={unitsRef}>
+            {picks.map((x, i) => (
+              <button key={i} type="button" role="tab" aria-selected={u === i}
+                className={`mq-fl-unit ${u === i ? 'is-on' : ''} ${done(i) ? 'is-done' : ''}`} onClick={() => setU(i)}>
+                {done(i) && <Check size={14} />}{unitLabel(c, i)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="mq-fl-body" ref={bodyRef}>
+          {c.units > 1 && u > 0 && picks[u - 1].length > 0 && picks[u].length === 0 && (
+            <button type="button" className="mq-fl-copy" onClick={copyPrev}>Usar los mismos sabores que el {unitLabel(c, u - 1).toLowerCase()}</button>
+          )}
+          {groups.map((g) => (
+            <section key={g.name} className="mq-fl-grp">
+              {groups.length > 1 && <h3>{g.name}</h3>}
+              <div className="mq-fl-chips">
+                {g.items.map((f) => {
+                  const on = picks[u].includes(f.id)
+                  const off = f.available === false
+                  return (
+                    <button key={f.id} type="button" className={`mq-fl ${on ? 'is-on' : ''}`} aria-pressed={on} disabled={off} onClick={() => toggle(f)}>
+                      {on && <Check size={14} />}{f.name}{off && <small>Agotado</small>}
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <div className="mq-fl-foot">
+          <p className={`mq-fl-status ${warn ? 'is-warn' : ''}`} aria-live="polite">
+            {warn || (picks[u].length
+              ? `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}${picks[u].map((id) => flavors.find((f) => f.id === id)?.name).join(', ')}`
+              : `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}tocá los sabores que quieras`)}
+          </p>
+          <button type="button" className="mq-submit" onClick={() => (complete ? onConfirm(picks) : setU(firstMissing))}>
+            {complete ? `Agregar · ${money(product.price)}`
+              : c.units > 1 && firstMissing !== u ? `Falta elegir el ${unitLabel(c, firstMissing).toLowerCase()}`
+                : `Elegí ${c.min === 1 ? 'al menos 1 sabor' : `al menos ${c.min} sabores`}`}
+          </button>
+        </div>
       </div>
     </div>
   )
