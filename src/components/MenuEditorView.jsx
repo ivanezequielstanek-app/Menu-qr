@@ -2,12 +2,14 @@
 // acá solo está la interfaz; cada uno le pasa sus funciones para guardar.
 import { useMemo, useState } from 'react'
 import { money, parsePrice } from '../lib/format'
-import { choiceOf, rangeText } from '../lib/flavors'
+import { choiceOf, summaryText, MAX_PARTS } from '../lib/flavors'
 import { ConfirmModal, Empty, Modal, Switch } from './ui'
 import PhotoPicker from './PhotoPicker'
 import { Plus, Edit, Trash, Up, Down, Eye, EyeOff, ImageIcon, Search, Star, Tag, Close } from './icons'
 
 const byPos = (a, b) => (a.position ?? 0) - (b.position ?? 0)
+// Atajos para agregar potes en el formulario: [nombre, máximo de sabores]
+const PART_PRESETS = [['Kilo', 4], ['1/2 kg', 3], ['1/4 kg', 2], ['Cucurucho', 2]]
 const fmtInput = (n) => String(n ?? '').replace('.', ',')
 
 /**
@@ -128,7 +130,7 @@ export default function MenuEditorView({
                     <span className="thumb">{p.image_url ? <img src={p.image_url} alt="" loading="lazy" /> : <ImageIcon />}</span>
                     <span className="prod-info">
                       <strong>{p.name}</strong>
-                      {choiceOf(p) && <span className="prod-choice">{choiceOf(p).units > 1 ? `${choiceOf(p).units} × ` : ''}{rangeText(choiceOf(p))}</span>}
+                      {choiceOf(p) && <span className="prod-choice">{summaryText(choiceOf(p))}</span>}
                       {p.description && <span className="muted">{p.description}</span>}
                     </span>
                     <span className="prod-price">{money(p.price)}</span>
@@ -249,12 +251,15 @@ export function ProductFormView({ categories, product, defaultCategory, onClose,
   })
   const [photo, setPhoto] = useState({ url: product?.image_url || null })
   const [error, setError] = useState('')
-  const [ch, setCh] = useState(() => {
+  // Potes que arma el cliente: [{ label, min, max }] o null si el producto no pide sabores
+  const [parts, setParts] = useState(() => {
     const c = choiceOf(product)
-    return c ? { units: String(c.units), min: String(c.min), max: String(c.max), label: c.label } : null
+    return c ? c.parts.map((x) => ({ label: x.label, min: String(x.min), max: String(x.max) })) : null
   })
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e?.target ? e.target.value : e }))
-  const setC = (k) => (e) => setCh((s) => ({ ...s, [k]: e.target.value }))
+  const setPart = (i, k) => (e) => setParts((ps) => ps.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)))
+  const addPart = (preset) => setParts((ps) => (ps.length >= MAX_PARTS ? ps : [...ps, preset || { ...ps[ps.length - 1] }]))
+  const removePart = (i) => setParts((ps) => (ps.length > 1 ? ps.filter((_, j) => j !== i) : ps))
 
   function save(e) {
     e.preventDefault()
@@ -263,11 +268,16 @@ export function ProductFormView({ categories, product, defaultCategory, onClose,
     if (!Number.isFinite(price) || price < 0) return setError('Revisá el precio. Ejemplo: 12500 o 12.500,50')
     if (!f.category_id) return setError('Elegí una categoría.')
     let choice = null
-    if (ch) {
-      const units = parseInt(ch.units, 10), min = parseInt(ch.min, 10), max = parseInt(ch.max, 10)
-      if (!(units >= 1 && units <= 10)) return setError('La cantidad de potes o unidades va de 1 a 10.')
-      if (!(min >= 1) || !(max >= min) || max > 30) return setError('Revisá los sabores: el mínimo es 1 y el máximo no puede ser menor que el mínimo.')
-      choice = { units, min, max, label: ch.label.trim().slice(0, 30) }
+    if (parts) {
+      const list = []
+      for (const [i, x] of parts.entries()) {
+        const min = parseInt(x.min, 10), max = parseInt(x.max, 10)
+        if (!(min >= 1) || !(max >= min) || max > 30) {
+          return setError(`Revisá el pote ${i + 1}${x.label ? ` (${x.label})` : ''}: el mínimo es 1 y el máximo no puede ser menor que el mínimo.`)
+        }
+        list.push({ label: x.label.trim().slice(0, 30), min, max })
+      }
+      choice = { parts: list }
     }
     setError('')
     onSubmit({
@@ -308,30 +318,35 @@ export function ProductFormView({ categories, product, defaultCategory, onClose,
             <Switch checked={f.available} onChange={set('available')} label={f.available ? 'Disponible' : 'Agotado (se muestra pero no se puede pedir)'} />
             <Switch checked={f.featured} onChange={set('featured')} label="Recomendado (aparece destacado arriba del menú)" />
           </div>
-          <div className={`choice-box ${ch ? 'is-on' : ''}`}>
-            <Switch checked={!!ch} onChange={(v) => setCh(v ? { units: '1', min: '1', max: '3', label: '' } : null)}
+          <div className={`choice-box ${parts ? 'is-on' : ''}`}>
+            <Switch checked={!!parts} onChange={(v) => setParts(v ? [{ label: '', min: '1', max: '3' }] : null)}
               label="El cliente elige sabores (helados, gustos…)" />
-            {ch && (<>
-              <div className="field-row">
-                <label className="field"><span>Potes o unidades</span>
-                  <input id="pf-units" className="input" type="number" inputMode="numeric" min="1" max="10" value={ch.units} onChange={setC('units')} />
-                </label>
-                <label className="field"><span>Cómo se llama cada uno</span>
-                  <input id="pf-unit-label" className="input" value={ch.label} onChange={setC('label')} placeholder={Number(ch.units) > 1 ? 'Ej: Pote de 1/4' : 'Ej: Kilo'} maxLength={30} />
-                </label>
+            {parts && (<>
+              <p className="hint">Cada fila es un pote que el cliente arma por separado, con su nombre y su cantidad de sabores.</p>
+              <div className="parts">
+                <div className="part-head" aria-hidden="true"><span /><span>Nombre del pote</span><span>Mín.</span><span>Máx.</span><span /></div>
+                {parts.map((x, i) => (
+                  <div className="part-row" key={i}>
+                    <span className="part-n">{i + 1}</span>
+                    <input id={`pf-part-${i}-label`} className="input" value={x.label} onChange={setPart(i, 'label')} maxLength={30}
+                      placeholder={i === 0 ? 'Ej: Kilo' : 'Ej: 1/4 de regalo'} aria-label={`Nombre del pote ${i + 1}`} />
+                    <input id={`pf-part-${i}-min`} className="input" type="number" inputMode="numeric" min="1" value={x.min} onChange={setPart(i, 'min')} aria-label={`Mínimo de sabores del pote ${i + 1}`} />
+                    <input id={`pf-part-${i}-max`} className="input" type="number" inputMode="numeric" min="1" value={x.max} onChange={setPart(i, 'max')} aria-label={`Máximo de sabores del pote ${i + 1}`} />
+                    <button type="button" className="icon-btn danger" onClick={() => removePart(i)} disabled={parts.length === 1} aria-label={`Quitar el pote ${i + 1}`}><Trash /></button>
+                  </div>
+                ))}
               </div>
-              <div className="field-row">
-                <label className="field"><span>Mínimo de sabores</span>
-                  <input id="pf-min" className="input" type="number" inputMode="numeric" min="1" value={ch.min} onChange={setC('min')} />
-                </label>
-                <label className="field"><span>Máximo de sabores</span>
-                  <input id="pf-max" className="input" type="number" inputMode="numeric" min="1" value={ch.max} onChange={setC('max')} />
-                </label>
-              </div>
+              {parts.length < MAX_PARTS && (
+                <div className="part-add">
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => addPart()}><Plus /> Otro igual</button>
+                  {PART_PRESETS.map(([l, m]) => (
+                    <button key={l} type="button" className="btn btn-ghost btn-sm" onClick={() => addPart({ label: l, min: '1', max: String(m) })}><Plus /> {l}</button>
+                  ))}
+                </div>
+              )}
               <p className="hint">
-                {Number(ch.units) > 1
-                  ? `El cliente va a elegir los sabores de cada uno de los ${ch.units} ${ch.label ? ch.label.toLowerCase() : 'potes'} por separado. El precio es el total de la promo.`
-                  : 'Ejemplos: 1 kg → 1 unidad, hasta 4 sabores. Promo 3x2 de 1/4 → 3 potes, hasta 2 sabores cada uno.'}
+                Ejemplos: <b>1 kg</b> → un pote "Kilo" con máx. 4. <b>3x2 de 1/4</b> → tres potes "Pote de 1/4" con máx. 2.
+                {' '}<b>1 kg + 1/4 de regalo</b> → "Kilo" con máx. 4 y "1/4 de regalo" con máx. 3. El precio es el total de la promo.
               </p>
               {flavorsCount === 0 && <p className="form-warn">Todavía no hay sabores cargados. Agregalos en la pestaña Sabores para que el cliente pueda elegir.</p>}
             </>)}

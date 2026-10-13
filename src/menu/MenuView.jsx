@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { resolveOptions } from '../lib/designs'
 import { money, readableOn, waLink } from '../lib/format'
-import { choiceOf, groupFlavors, rangeText, unitLabel } from '../lib/flavors'
+import { choiceOf, groupFlavors, isUniform, rangeText, summaryText, unitLabel } from '../lib/flavors'
 import { Plus, Close, Chevron, Check, WhatsApp, Left, Right } from '../components/icons'
 
 const TYPES = [
@@ -147,7 +147,7 @@ export default function MenuView({
             <span className="mq-price">{money(p.price)}</span>
           </div>
           {o.showDescriptions && p.description && <p className="mq-desc">{p.description}</p>}
-          {pick && !out && <span className="mq-choose">{choiceOf(p).units > 1 ? `${choiceOf(p).units} × ` : ''}{rangeText(choiceOf(p))}</span>}
+          {pick && !out && <span className="mq-choose">{summaryText(choiceOf(p))}</span>}
           {out && <span className="mq-out">Agotado</span>}
         </div>
         {canOrder && !out && (
@@ -496,8 +496,9 @@ function FlavorPicker({ product, flavors, onClose, onConfirm }) {
   const [warn, setWarn] = useState('')
   const groups = useMemo(() => groupFlavors(flavors), [flavors])
   const bodyRef = useRef(null)
-  const done = (i) => picks[i].length >= c.min
-  const firstMissing = picks.findIndex((x) => x.length < c.min)
+  const part = c.parts[u]
+  const done = (i) => picks[i].length >= c.parts[i].min
+  const firstMissing = picks.findIndex((x, i) => x.length < c.parts[i].min)
   const complete = firstMissing === -1
 
   useEffect(() => {
@@ -515,17 +516,17 @@ function FlavorPicker({ product, flavors, onClose, onConfirm }) {
   function toggle(f) {
     if (f.available === false) return
     const cur = picks[u]
-    if (!cur.includes(f.id) && cur.length >= c.max) {
-      setWarn(`Ya elegiste ${c.max} ${c.max === 1 ? 'sabor' : 'sabores'}${c.units > 1 ? ' en este pote' : ''}. Tocá uno para cambiarlo.`)
+    if (!cur.includes(f.id) && cur.length >= part.max) {
+      setWarn(`Ya elegiste ${part.max} ${part.max === 1 ? 'sabor' : 'sabores'}${c.units > 1 ? ` en ${unitLabel(c, u)}` : ''}. Tocá uno para cambiarlo.`)
       return
     }
     setWarn('')
     const next = picks.map((x, i) => (i !== u ? x : x.includes(f.id) ? x.filter((id) => id !== f.id) : [...x, f.id]))
     setPicks(next)
     // Pote lleno: pasa solo al siguiente que esté vacío
-    if (next[u].length === c.max && u < c.units - 1 && next[u + 1].length === 0) setTimeout(() => setU(u + 1), 280)
+    if (next[u].length === part.max && u < c.units - 1 && next[u + 1].length === 0) setTimeout(() => setU(u + 1), 280)
   }
-  const copyPrev = () => setPicks((ps) => ps.map((x, i) => (i === u ? [...ps[u - 1]] : x)))
+  const copyPrev = () => setPicks((ps) => ps.map((x, i) => (i === u ? ps[u - 1].slice(0, part.max) : x)))
 
   return (
     <div className="mq-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -536,7 +537,9 @@ function FlavorPicker({ product, flavors, onClose, onConfirm }) {
           <button type="button" className="mq-close" onClick={onClose} aria-label="Cerrar"><Close /></button>
         </div>
         <p className="mq-fl-sub">
-          {c.units > 1 ? `Son ${c.units} · elegí ${rangeText(c)} en cada uno` : `Elegí ${rangeText(c)}`}
+          {c.units === 1 ? `Elegí ${rangeText(part)}`
+            : isUniform(c) ? `Son ${c.units} · elegí ${rangeText(part)} en cada uno`
+              : `${unitLabel(c, u)}: elegí ${rangeText(part)}`}
         </p>
 
         {c.units > 1 && (
@@ -562,8 +565,12 @@ function FlavorPicker({ product, flavors, onClose, onConfirm }) {
                   const on = picks[u].includes(f.id)
                   const off = f.available === false
                   return (
-                    <button key={f.id} type="button" className={`mq-fl ${on ? 'is-on' : ''}`} aria-pressed={on} disabled={off} onClick={() => toggle(f)}>
-                      {on && <Check size={14} />}{f.name}{off && <small>Agotado</small>}
+                    <button key={f.id} type="button" className={`mq-fl ${on ? 'is-on' : ''} ${f.description ? 'has-desc' : ''}`} aria-pressed={on} disabled={off} onClick={() => toggle(f)}>
+                      {on && <Check size={14} />}
+                      <span className="mq-fl-txt">
+                        <span>{f.name}{off && <small> · Agotado</small>}</span>
+                        {f.description && <small className="mq-fl-desc">{f.description}</small>}
+                      </span>
                     </button>
                   )
                 })}
@@ -575,13 +582,13 @@ function FlavorPicker({ product, flavors, onClose, onConfirm }) {
         <div className="mq-fl-foot">
           <p className={`mq-fl-status ${warn ? 'is-warn' : ''}`} aria-live="polite">
             {warn || (picks[u].length
-              ? `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}${picks[u].map((id) => flavors.find((f) => f.id === id)?.name).join(', ')}`
-              : `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}tocá los sabores que quieras`)}
+              ? `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}${picks[u].map((id) => flavors.find((f) => f.id === id)?.name).join(', ')} (${picks[u].length}/${part.max})`
+              : `${c.units > 1 ? unitLabel(c, u) + ': ' : ''}tocá ${rangeText(part)}`)}
           </p>
           <button type="button" className="mq-submit" onClick={() => (complete ? onConfirm(picks) : setU(firstMissing))}>
             {complete ? `Agregar · ${money(product.price)}`
               : c.units > 1 && firstMissing !== u ? `Falta elegir el ${unitLabel(c, firstMissing).toLowerCase()}`
-                : `Elegí ${c.min === 1 ? 'al menos 1 sabor' : `al menos ${c.min} sabores`}`}
+                : `Elegí ${part.min === 1 ? 'al menos 1 sabor' : `al menos ${part.min} sabores`}`}
           </button>
         </div>
       </div>

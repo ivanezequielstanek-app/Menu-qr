@@ -28,7 +28,7 @@ function samplePicks(p, flavors, seed) {
   const c = choiceOf(p)
   const ok = flavors.filter((f) => f.available !== false)
   if (!c || !ok.length) return null
-  return Array.from({ length: c.units }, (_, u) => Array.from({ length: Math.min(c.max, 2, ok.length) }, (_, k) => ok[(seed * 3 + u * 2 + k * 5) % ok.length].id)
+  return Array.from({ length: c.units }, (_, u) => Array.from({ length: Math.min(c.parts[u].max, 2, ok.length) }, (_, k) => ok[(seed * 3 + u * 2 + k * 5) % ok.length].id)
     .filter((id, i, a) => a.indexOf(id) === i))
 }
 

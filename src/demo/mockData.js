@@ -94,9 +94,10 @@ function build(restaurant, cats, extra = {}) {
     name: it[0], description: it[1], price: it[2], image_url: it[3], available: it[4] !== false, featured: it[5] === true,
     choice: it[6] || null,
   })))
-  const flavors = (extra.flavors || []).flatMap(([grp, names], gi) => names.map((n, i) => {
+  const flavors = (extra.flavors || []).flatMap(([grp, names], gi) => names.map((entry, i) => {
+    const [n, description = null] = Array.isArray(entry) ? entry : [entry] // ['Nombre', 'Descripción']
     const out = n.endsWith('*') // un asterisco al final = agotado
-    return { id: `f${gi}-${i}`, name: out ? n.slice(0, -1) : n, grp, available: !out, position: gi * 100 + i }
+    return { id: `f${gi}-${i}`, name: out ? n.slice(0, -1) : n, grp, available: !out, position: gi * 100 + i, description }
   }))
   return { restaurant, categories, products, flavors, theme: extra.theme }
 }
@@ -277,6 +278,8 @@ SAMPLES.heladeria = () => {
     { name: 'Promos', items: [
       ['3x2 en potes de 1/4', 'Llevá 3 potes de 1/4 y pagá 2. Hasta 2 sabores por pote', 10400, H(['#f28cb0', '#6b3a2a', '#9ed6a5'], 'cup', bg2), true, true, { units: 3, min: 1, max: 2, label: 'Pote de 1/4' }],
       ['2 kilos', 'Dos potes de 1 kg con hasta 4 sabores cada uno', 30000, H(['#c98b4b', '#fff4d6', '#6b3a2a', '#f7e98a'], 'cup'), true, true, { units: 2, min: 1, max: 4, label: 'Kilo' }],
+      ['1 kg + 1/4 de regalo', 'Comprando 1 kg te llevás 1/4 gratis. Elegí los sabores de cada uno', 16000, H(['#f28cb0', '#6b3a2a', '#f3d9a4'], 'cup', bg2), true, true,
+        { parts: [{ label: 'Kilo', min: 1, max: 4 }, { label: '1/4 de regalo', min: 1, max: 3 }] }],
     ] },
     { name: 'Cucuruchos y vasitos', items: [
       ['Cucurucho', 'Hasta 2 sabores', 3800, H(['#f3d9a4', '#6b3a2a'], 'cone', bg2), true, false, kilo(2, 'Cucurucho')],
@@ -290,11 +293,11 @@ SAMPLES.heladeria = () => {
   ], {
     theme: 'cafe',
     flavors: [
-      ['Cremas', ['Crema americana', 'Vainilla', 'Frutilla a la crema', 'Sambayón', 'Tramontana']],
+      ['Cremas', ['Crema americana', 'Vainilla', 'Frutilla a la crema', 'Sambayón', ['Tramontana', 'Crema con dulce de leche y bombones crocantes']]],
       ['Chocolates', ['Chocolate', 'Chocolate amargo', 'Chocolate con almendras', 'Chocolate suizo']],
-      ['Dulce de leche', ['Dulce de leche', 'Dulce de leche granizado', 'Súper dulce de leche', 'Dulce de leche con brownie']],
+      ['Dulce de leche', ['Dulce de leche', 'Dulce de leche granizado', 'Súper dulce de leche', ['Chocotorta', 'Dulce de leche con queso crema y galletitas Chocolinas']]],
       ['Frutales', ['Limón', 'Frutilla al agua', 'Durazno', 'Maracuyá', 'Ananá*']],
-      ['Especiales', ['Pistacho*', 'Menta granizada', 'Cookies', 'Banana split']],
+      ['Especiales', ['Pistacho*', 'Menta granizada', ['Cookies', 'Crema de vainilla con trozos de galletitas de chocolate'], ['Banana split', 'Banana con dulce de leche y salsa de chocolate']]],
     ],
   })
   function P2(c) { return plate(Math.round(c.length * 17), bg, c) }
