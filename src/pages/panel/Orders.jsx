@@ -3,6 +3,7 @@ import { supabase, friendlyError } from '../../lib/supabase'
 import { money, timeAgo } from '../../lib/format'
 import { ConfirmModal, Empty, Segmented, Spinner, useToast } from '../../components/ui'
 import { Bell } from '../../components/icons'
+import { PrintButton, PrintModal, orderCode } from '../../components/OrderPrint'
 
 const STATUS = {
   nuevo: { label: 'Nuevo', next: 'preparando', action: 'Empezar a preparar' },
@@ -34,6 +35,7 @@ export default function Orders({ restaurant }) {
   const [filter, setFilter] = useState('active')
   const [sound, setSound] = useState(false)
   const [ask, setAsk] = useState(null)
+  const [print, setPrint] = useState(null)
   const soundRef = useRef(sound)
   soundRef.current = sound
   const [, tick] = useState(0)
@@ -106,7 +108,7 @@ export default function Orders({ restaurant }) {
                       {TYPE[o.order_type]}{o.order_type === 'mesa' && o.table_number ? ` ${o.table_number}` : ''}
                       {o.customer_name ? ` · ${o.customer_name}` : ''}
                     </strong>
-                    <span className="muted">{timeAgo(o.created_at)}</span>
+                    <span className="muted">{orderCode(o)} · {timeAgo(o.created_at)}</span>
                   </div>
                   <span className={`status status-${o.status}`}>{st.label}</span>
                 </header>
@@ -120,6 +122,7 @@ export default function Orders({ restaurant }) {
                 <footer>
                   <strong>{money(o.total)}</strong>
                   <div className="order-btns">
+                    <PrintButton onClick={() => setPrint(o)} />
                     {['nuevo', 'preparando'].includes(o.status) && (
                       <button className="btn btn-ghost btn-sm btn-danger-text" onClick={() => setAsk(o)}>Cancelar</button>
                     )}
@@ -131,6 +134,7 @@ export default function Orders({ restaurant }) {
           })}
         </div>
       )}
+      {print && <PrintModal order={print} restaurant={restaurant} onClose={() => setPrint(null)} />}
       {ask && <ConfirmModal title="Cancelar pedido" text="¿Cancelar este pedido?" yes="Cancelar pedido"
         onYes={() => setStatus(ask, 'cancelado')} onClose={() => setAsk(null)} />}
     </div>

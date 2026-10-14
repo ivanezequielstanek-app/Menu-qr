@@ -38,3 +38,4 @@ export const Star = ({ filled, ...p }) => (
 )
 export const Tag = (p) => <I {...p} d={<><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="8.5" r="1.5" /></>} />
 export const IceCream = (p) => <I {...p} d={<><path d="M7 10a5 5 0 0 1 10 0" /><path d="M6 10h12l-6 11z" /><path d="M9.5 13.5l5 0" /></>} />
+export const Printer = (p) => <I {...p} d={<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />} />

@@ -8,6 +8,7 @@ import { ConfirmModal, Empty, Segmented, useToast } from '../components/ui'
 import PhotoPicker from '../components/PhotoPicker'
 import { useDemo, uid } from './store'
 import FlavorsEditorView from '../components/FlavorsEditorView'
+import { PrintButton, PrintModal, orderCode } from '../components/OrderPrint'
 
 /* ---------------- Mi local ---------------- */
 export function DemoSettings() {
@@ -159,6 +160,7 @@ export function DemoOrders({ onGoPreview }) {
   const { state, update } = useDemo()
   const [filter, setFilter] = useState('active')
   const [ask, setAsk] = useState(null)
+  const [print, setPrint] = useState(null)
   const [, tick] = useState(0)
   const seen = useRef(false)
 
@@ -204,7 +206,7 @@ export function DemoOrders({ onGoPreview }) {
                       {TYPE[o.order_type]}{o.order_type === 'mesa' && o.table_number ? ` ${o.table_number}` : ''}
                       {o.customer_name ? ` · ${o.customer_name}` : ''}
                     </strong>
-                    <span className="muted">{timeAgo(o.created_at)}</span>
+                    <span className="muted">{orderCode(o)} · {timeAgo(o.created_at)}</span>
                   </div>
                   <span className={`status status-${o.status}`}>{st.label}</span>
                 </header>
@@ -218,6 +220,7 @@ export function DemoOrders({ onGoPreview }) {
                 <footer>
                   <strong>{money(o.total)}</strong>
                   <div className="order-btns">
+                    <PrintButton onClick={() => setPrint(o)} />
                     {['nuevo', 'preparando'].includes(o.status) && (
                       <button className="btn btn-ghost btn-sm btn-danger-text" onClick={() => setAsk(o)}>Cancelar</button>
                     )}
@@ -229,6 +232,7 @@ export function DemoOrders({ onGoPreview }) {
           })}
         </div>
       )}
+      {print && <PrintModal order={print} restaurant={state.restaurant} onClose={() => setPrint(null)} />}
       {ask && <ConfirmModal title="Cancelar pedido" text="¿Cancelar este pedido?" yes="Cancelar pedido"
         onYes={() => setStatus(ask, 'cancelado')} onClose={() => setAsk(null)} />}
     </div>
